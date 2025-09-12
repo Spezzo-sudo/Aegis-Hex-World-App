@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { usePlayerStore } from '../../types/usePlayerStore';
+import { useAuthStore } from '../../types/useAuthStore';
+import { signOutUser } from '../../services/authService';
 import { Resource } from '../../types';
 import { MetallumIcon, KristallinIcon, PlasmaCoreIcon, EnergieIcon } from '../../constants/icons';
+import { Button } from '../ui/Button';
 
 const ResourceItem: React.FC<{ icon: React.ReactNode; value: number; capacity?: number; label: string }> = ({ icon, value, capacity, label }) => {
     const isEnergy = label === Resource.Energie;
@@ -12,10 +15,9 @@ const ResourceItem: React.FC<{ icon: React.ReactNode; value: number; capacity?: 
     const prevValueRef = useRef(value);
 
     useEffect(() => {
-        // Pulse only on resource gain, not for energy changes or initial load
         if (value > prevValueRef.current && !isEnergy && prevValueRef.current !== 0) {
             setIsPulsing(true);
-            const timer = setTimeout(() => setIsPulsing(false), 400); // Animation duration
+            const timer = setTimeout(() => setIsPulsing(false), 400);
             return () => clearTimeout(timer);
         }
         prevValueRef.current = value;
@@ -53,10 +55,18 @@ const ResourceItem: React.FC<{ icon: React.ReactNode; value: number; capacity?: 
 
 export const Header: React.FC = () => {
     const { colony } = usePlayerStore();
+    const { user } = useAuthStore();
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+    const handleLogout = async () => {
+        setIsLoggingOut(true);
+        await signOutUser();
+        // The loading state will be managed globally by the auth listener
+    };
 
     if (!colony) return null;
 
-    const { resources, storage, name } = colony;
+    const { resources, storage } = colony;
 
     return (
         <header className="bg-surface/50 backdrop-blur-sm border-b border-grid p-2 flex items-center justify-between z-20 shrink-0">
@@ -71,6 +81,13 @@ export const Header: React.FC = () => {
                 <ResourceItem icon={<KristallinIcon className="text-secondary"/>} value={resources.Kristallin} capacity={storage.Kristallin} label={Resource.Kristallin} />
                 <ResourceItem icon={<PlasmaCoreIcon className="text-alliance-c"/>} value={resources.PlasmaCore} capacity={storage.PlasmaCore} label={Resource.PlasmaCore} />
                 <ResourceItem icon={<EnergieIcon className="text-yellow-400"/>} value={resources.Energie} label={Resource.Energie} />
+            </div>
+            <div className="px-4 flex items-center space-x-4">
+                 <div className="text-right hidden sm:block">
+                     <p className="text-xs text-textMuted truncate">{user?.email}</p>
+                     <p className="text-sm font-semibold text-primary">{colony.name}</p>
+                 </div>
+                 <Button onClick={handleLogout} isLoading={isLoggingOut} size="sm" variant="secondary">Logout</Button>
             </div>
         </header>
     );

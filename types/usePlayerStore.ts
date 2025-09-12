@@ -4,6 +4,7 @@ import { Colony, Resource, QueueItem, BuildingType, ResearchType, UnitType, Comb
 interface PlayerState {
   colony: Colony | null;
   setColony: (colony: Colony) => void;
+  clearColony: () => void;
   updateResources: (resources: Partial<{ [key in Resource]: number }>) => void;
   addQueueItem: (queueType: 'building' | 'research' | 'shipyard', item: QueueItem) => void;
   finishBuilding: (item: QueueItem) => void;
@@ -22,6 +23,7 @@ const finishQueueItem = (state: Colony, queueType: 'buildingQueue' | 'researchQu
 export const usePlayerStore = create<PlayerState>((set) => ({
   colony: null,
   setColony: (colony) => set({ colony }),
+  clearColony: () => set({ colony: null }),
   updateResources: (resources) =>
     set((state) => {
       if (!state.colony) return {};

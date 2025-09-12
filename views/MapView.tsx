@@ -32,15 +32,15 @@ const HexDefs: React.FC = React.memo(() => (
             </feMerge>
         </filter>
         <pattern id="fog-noise" patternUnits="userSpaceOnUse" width="100" height="100">
-            <rect width="100" height="100" fill="rgba(27, 42, 62, 0.75)" />
-            <circle cx="20" cy="30" r="0.5" fill="white" opacity="0.2"/>
-            <circle cx="80" cy="70" r="0.4" fill="white" opacity="0.25"/>
-            <circle cx="50" cy="90" r="0.6" fill="white" opacity="0.2"/>
-            <circle cx="10" cy="80" r="0.5" fill="white" opacity="0.3"/>
-            <circle cx="90" cy="10" r="0.5" fill="white" opacity="0.25"/>
-            <circle cx="50" cy="10" r="0.5" fill="white" opacity="0.3"/>
-            <circle cx="25" cy="75" r="0.4" fill="white" opacity="0.2"/>
-            <circle cx="75" cy="50" r="0.6" fill="white" opacity="0.25"/>
+            <rect width="100" height="100" fill="rgba(7, 14, 24, 0.85)" />
+            <circle cx="20" cy="30" r="0.5" fill="white" opacity="0.1"/>
+            <circle cx="80" cy="70" r="0.4" fill="white" opacity="0.15"/>
+            <circle cx="50" cy="90" r="0.6" fill="white" opacity="0.1"/>
+            <circle cx="10" cy="80" r="0.5" fill="white" opacity="0.15"/>
+            <circle cx="90" cy="10" r="0.5" fill="white" opacity="0.1"/>
+            <circle cx="50" cy="10" r="0.5" fill="white" opacity="0.15"/>
+            <circle cx="25" cy="75" r="0.4" fill="white" opacity="0.1"/>
+            <circle cx="75" cy="50" r="0.6" fill="white" opacity="0.15"/>
         </pattern>
         {/* Glyphs */}
         <symbol id="glyph-metallum" viewBox="-20 -20 40 40">
@@ -62,20 +62,22 @@ const HexDefs: React.FC = React.memo(() => (
     </defs>
 ));
 
-const Hex: React.FC<{ tile: HexTileData; onClick: () => void; isSelected: boolean }> = React.memo(({ tile, onClick, isSelected }) => {
+const Hex: React.FC<{ tile: HexTileData; onClick: () => void; isSelected: boolean; zoomLevel: number; }> = React.memo(({ tile, onClick, isSelected, zoomLevel }) => {
   const { q, r } = tile;
   const x = HEX_SIZE * 1.5 * q;
   const y = HEX_SIZE * (Math.sqrt(3) / 2 * q + Math.sqrt(3) * r);
   const isExplored = tile.isExplored ?? false;
   
+  const effectiveHexHeight = HEX_HEIGHT * Math.min(1, zoomLevel / 0.6);
+
   const corners = useMemo(() => Array.from({ length: 6 }).map((_, i) => {
     const angle_rad = Math.PI / 180 * (60 * i);
     return { x: x + HEX_SIZE * Math.cos(angle_rad), y: y + HEX_SIZE * Math.sin(angle_rad) };
   }), [x, y]);
 
   const topPoints = corners.map(c => `${c.x},${c.y}`).join(' ');
-  const side1Points = `${corners[0].x},${corners[0].y} ${corners[1].x},${corners[1].y} ${corners[1].x},${corners[1].y + HEX_HEIGHT} ${corners[0].x},${corners[0].y + HEX_HEIGHT}`;
-  const side2Points = `${corners[1].x},${corners[1].y} ${corners[2].x},${corners[2].y} ${corners[2].x},${corners[2].y + HEX_HEIGHT} ${corners[1].x},${corners[1].y + HEX_HEIGHT}`;
+  const side1Points = `${corners[0].x},${corners[0].y} ${corners[1].x},${corners[1].y} ${corners[1].x},${corners[1].y + effectiveHexHeight} ${corners[0].x},${corners[0].y + effectiveHexHeight}`;
+  const side2Points = `${corners[1].x},${corners[1].y} ${corners[2].x},${corners[2].y} ${corners[2].x},${corners[2].y + effectiveHexHeight} ${corners[1].x},${corners[1].y + effectiveHexHeight}`;
   
   const rimColor = ownerColorMap[tile.owner || ''] || 'transparent';
   const rimPattern = tile.owner === 'Alliance B' ? 'url(#pattern-alliance-b)' : rimColor;
@@ -94,14 +96,14 @@ const Hex: React.FC<{ tile: HexTileData; onClick: () => void; isSelected: boolea
       className={isExplored ? "cursor-pointer group relative" : "relative"}
     >
       {/* 2.5D Prism Sides */}
-      <polygon points={side1Points} fill={sideFaceFillLight} stroke={gridStroke} strokeWidth="1" />
-      <polygon points={side2Points} fill={sideFaceFillDark} stroke={gridStroke} strokeWidth="1" />
+      <polygon points={side1Points} fill={sideFaceFillLight} stroke={gridStroke} strokeWidth="1" strokeOpacity="0.7" />
+      <polygon points={side2Points} fill={sideFaceFillDark} stroke={gridStroke} strokeWidth="1" strokeOpacity="0.7" />
       
       {/* Top Face and Details */}
       {isExplored ? (
         <>
           {/* Top Face */}
-          <polygon points={topPoints} fill={topFaceFill} stroke={gridStroke} strokeWidth="1" />
+          <polygon points={topPoints} fill={topFaceFill} stroke={gridStroke} strokeWidth="1" strokeOpacity="0.7" />
           <polygon points={topPoints} className="fill-transparent group-hover:fill-primary/10 transition-colors duration-200" />
           
           {/* Ownership Rim */}
@@ -114,10 +116,17 @@ const Hex: React.FC<{ tile: HexTileData; onClick: () => void; isSelected: boolea
               : <use href={glyphType} width="40" height="40" x="-20" y="-20" />}
           </g>
 
-          {/* Wealth Pips */}
-          {tile.wealth && Array.from({ length: tile.wealth }).map((_, i) => (
+          {/* Wealth Pips - visible at mid-zoom */}
+          {zoomLevel > 0.5 && tile.wealth && Array.from({ length: tile.wealth }).map((_, i) => (
             <circle key={i} cx={x + (i - (tile.wealth! - 1) / 2) * 10} cy={y + HEX_SIZE * 0.75} r="2" className="fill-textMuted/70" />
           ))}
+
+          {/* Planet Type Label - visible at close-zoom */}
+          {zoomLevel > 0.9 && (
+            <text x={x} y={y - HEX_SIZE * 0.65} textAnchor="middle" className="fill-textMuted/80 text-[10px] font-semibold pointer-events-none transition-opacity duration-200 uppercase tracking-widest">
+                {tile.type}
+            </text>
+          )}
           
           {/* Selection / Hover States */}
           {isSelected && (
@@ -130,7 +139,7 @@ const Hex: React.FC<{ tile: HexTileData; onClick: () => void; isSelected: boolea
           </foreignObject>
         </>
       ) : (
-        <polygon points={topPoints} fill="url(#fog-noise)" stroke={gridStroke} strokeWidth="1" />
+        <polygon points={topPoints} fill="url(#fog-noise)" stroke={gridStroke} strokeWidth="1" strokeOpacity="0.7" />
       )}
     </g>
   );
@@ -164,7 +173,7 @@ const PlanetInfo: React.FC<{ tile: HexTileData | null }> = ({ tile }) => {
 
     if (!tile) {
         return (
-            <Card title="Sector Details" className="h-full bg-surface/80 backdrop-blur-md">
+            <Card title="Sector Details" className="bg-surface/80 backdrop-blur-md md:h-full">
                 <p className="text-textMuted">Select a hex to view details.</p>
             </Card>
         );
@@ -172,7 +181,7 @@ const PlanetInfo: React.FC<{ tile: HexTileData | null }> = ({ tile }) => {
     
     if (!tile.isExplored) {
         return (
-            <Card title="Unknown Sector" className="h-full bg-surface/80 backdrop-blur-md">
+            <Card title="Unknown Sector" className="bg-surface/80 backdrop-blur-md md:h-full">
                 <p className="text-textMuted">This sector is obscured by the fog of war. Send a probe or fleet to explore it.</p>
             </Card>
         );
@@ -182,7 +191,7 @@ const PlanetInfo: React.FC<{ tile: HexTileData | null }> = ({ tile }) => {
     const totalShips = Object.values(colony?.units || {}).reduce((a, b) => a + (Number(b) || 0), 0);
 
     return (
-        <Card title={`Hex (${tile.q}, ${tile.r})`} className="h-full flex flex-col bg-surface/80 backdrop-blur-md">
+        <Card title={`Hex (${tile.q}, ${tile.r})`} className="flex flex-col bg-surface/80 backdrop-blur-md md:h-full">
             <div className="flex-grow">
                 <h4 className="text-xl font-bold text-textHi">{tile.type} Planet</h4>
                 {tile.bonus && <p className="text-yellow-400 text-sm">{tile.bonus}</p>}
@@ -245,16 +254,19 @@ const generateMap = (radius: number): HexTileData[] => {
         homeTile.bonus = '+10% All Production';
         homeTile.isHostile = false;
         homeTile.wealth = 3;
-        homeTile.isExplored = true;
         
-        // Explore neighboring tiles
-        const neighbors = [
-            {q: 1, r: 0}, {q: -1, r: 0}, {q: 0, r: 1}, {q: 0, r: -1}, {q: 1, r: -1}, {q: -1, r: 1}
-        ];
-        neighbors.forEach(n => {
-            const neighborTile = tiles.find(t => t.q === homeTile.q + n.q && t.r === homeTile.r + n.r);
-            if(neighborTile) {
-                neighborTile.isExplored = true;
+        // Explore a larger starting area
+        const startRadius = 2;
+        tiles.forEach(tile => {
+            // Using cube coordinates distance from origin (0,0,0)
+            const dist = (Math.abs(tile.q) + Math.abs(tile.r) + Math.abs(tile.s)) / 2;
+            if (dist <= startRadius) {
+                tile.isExplored = true;
+                // Also ensure these starting tiles are not hostile for a safer start
+                if (tile.q !== 0 || tile.r !== 0) {
+                   tile.isHostile = false;
+                   tile.owner = undefined;
+                }
             }
         });
     }
@@ -280,8 +292,8 @@ const CombatLog: React.FC = () => {
 
 const MapView: React.FC = () => {
     const [selectedTile, setSelectedTile] = useState<HexTileData | null>(null);
-    const mapData = useMemo(() => generateMap(12), []);
-    const [transform, setTransform] = useState({ x: 0, y: 0, k: 0.8 });
+    const mapData = useMemo(() => generateMap(15), []);
+    const [transform, setTransform] = useState({ x: 0, y: 0, k: 0.35 });
     const [isPanning, setIsPanning] = useState(false);
     const [startPan, setStartPan] = useState({ x: 0, y: 0 });
     const svgContainerRef = useRef<HTMLDivElement>(null);
@@ -326,7 +338,7 @@ const MapView: React.FC = () => {
         e.preventDefault();
         const scaleAmount = -e.deltaY * 0.001;
         const newScale = transform.k * (1 + scaleAmount);
-        setTransform(prev => ({...prev, k: Math.min(Math.max(0.2, newScale), 1.5)}));
+        setTransform(prev => ({...prev, k: Math.min(Math.max(0.15, newScale), 1.5)}));
     };
 
     const handleTileClick = useCallback((tile: HexTileData) => {
@@ -348,14 +360,14 @@ const MapView: React.FC = () => {
                     <g transform={`scale(${transform.k}) translate(${transform.x}, ${transform.y})`}>
                         <g transform={`translate(${containerSize.width / (2*transform.k)}, ${containerSize.height / (2*transform.k)})`}>
                           {mapData.map(tile => (
-                              <Hex key={`${tile.q}-${tile.r}`} tile={tile} onClick={() => handleTileClick(tile)} isSelected={selectedTile?.q === tile.q && selectedTile?.r === tile.r} />
+                              <Hex key={`${tile.q}-${tile.r}`} tile={tile} onClick={() => handleTileClick(tile)} isSelected={selectedTile?.q === tile.q && selectedTile?.r === tile.r} zoomLevel={transform.k} />
                           ))}
                         </g>
                     </g>
                 </svg>
                 <CombatLog />
             </div>
-            <div className="w-full md:w-80 lg:w-96 flex-shrink-0 h-full overflow-y-auto">
+            <div className="w-full md:w-80 lg:w-96 flex-shrink-0 overflow-y-auto">
                 <PlanetInfo tile={selectedTile} />
             </div>
         </div>
