@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { usePlayerStore } from '../types/usePlayerStore';
 import { Card } from '../components/ui/Card';
@@ -42,45 +43,57 @@ const UnitCard: React.FC<{ type: UnitType }> = ({ type }) => {
   };
   
   return (
-    <Card className="flex flex-col">
-        <div className="flex-grow">
-            <div className="flex justify-between items-baseline">
-                <h4 className="text-lg font-semibold text-textHi">{data.name}</h4>
-                <p className="text-sm text-textMuted tabular-nums">Owned: {currentAmount}</p>
-            </div>
-            <p className="text-textMuted text-xs mt-1 h-10">{data.description}</p>
-            
-            <div className="mt-4 border-t border-grid pt-3">
-                 <div className="flex items-center space-x-2">
-                    <label htmlFor={`amount-${type}`} className="text-sm text-textMuted">Amount:</label>
-                    <input 
-                        type="number"
-                        id={`amount-${type}`}
-                        value={amount}
-                        min="1"
-                        onChange={(e) => setAmount(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-20 bg-bg border border-grid rounded-md p-1 text-center tabular-nums"
-                    />
-                </div>
-                <div className="mt-2 space-y-1 text-textMuted text-sm">
-                    <div className="flex items-center justify-between"><div className="flex items-center"><MetallumIcon className="w-4 h-4 mr-2 text-textMuted/50" /> Metallum:</div> <span className="tabular-nums">{cost.Metallum || 0}</span></div>
-                    <div className="flex items-center justify-between"><div className="flex items-center"><KristallinIcon className="w-4 h-4 mr-2 text-secondary/50" /> Kristallin:</div> <span className="tabular-nums">{cost.Kristallin || 0}</span></div>
-                    <div className="flex items-center justify-between"><div className="flex items-center"><ClockIcon className="w-4 h-4 mr-2 text-yellow-500/50" /> Time:</div> <span className="tabular-nums">{formatTime(time)}</span></div>
-                </div>
-            </div>
+    <Card className="flex flex-col !p-0 overflow-hidden">
+        <div className="aspect-video bg-bg overflow-hidden">
+            <img src={data.image} alt={data.name} className="w-full h-full object-cover"/>
         </div>
-      
-        <div className="mt-4 pt-4 border-t border-grid">
-            <Button 
-                onClick={handleBuild} 
-                disabled={!canAfford || isBuilding || (colony?.shipyardQueue.length || 0) > 4} 
-                isLoading={isBuilding}
-                className="w-full"
-                size="md"
-            >
-                <ShipyardIcon className="w-5 h-5 mr-1" />
-                Build {amount}
-            </Button>
+        <div className="p-4 flex flex-col flex-grow">
+            <div className="flex-grow">
+                <div className="flex justify-between items-baseline">
+                    <h4 className="text-lg font-semibold text-textHi">{data.name}</h4>
+                    <p className="text-sm text-textMuted tabular-nums">Owned: {currentAmount}</p>
+                </div>
+                <p className="text-textMuted text-xs mt-1 h-12">{data.description}</p>
+                
+                {data.special && (
+                    <div className="mt-3 pt-3 border-t border-grid/50">
+                        <h5 className="text-xs font-semibold text-primary uppercase tracking-wider">Special Skill</h5>
+                        <p className="text-xs text-textMuted italic mt-1">{data.special}</p>
+                    </div>
+                )}
+
+                <div className="mt-4 border-t border-grid pt-3">
+                    <div className="flex items-center space-x-2">
+                        <label htmlFor={`amount-${type}`} className="text-sm text-textMuted">Amount:</label>
+                        <input 
+                            type="number"
+                            id={`amount-${type}`}
+                            value={amount}
+                            min="1"
+                            onChange={(e) => setAmount(Math.max(1, parseInt(e.target.value) || 1))}
+                            className="w-20 bg-bg border border-grid rounded-md p-1 text-center tabular-nums"
+                        />
+                    </div>
+                    <div className="mt-2 space-y-1 text-textMuted text-sm">
+                        <div className="flex items-center justify-between"><div className="flex items-center"><MetallumIcon className="w-4 h-4 mr-2 text-textMuted/50" /> Metallum:</div> <span className="tabular-nums">{cost.Metallum || 0}</span></div>
+                        <div className="flex items-center justify-between"><div className="flex items-center"><KristallinIcon className="w-4 h-4 mr-2 text-secondary/50" /> Kristallin:</div> <span className="tabular-nums">{cost.Kristallin || 0}</span></div>
+                        <div className="flex items-center justify-between"><div className="flex items-center"><ClockIcon className="w-4 h-4 mr-2 text-yellow-500/50" /> Time:</div> <span className="tabular-nums">{formatTime(time)}</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div className="mt-4 pt-4 border-t border-grid">
+                <Button 
+                    onClick={handleBuild} 
+                    disabled={!canAfford || isBuilding || (colony?.shipyardQueue.length || 0) > 4} 
+                    isLoading={isBuilding}
+                    className="w-full"
+                    size="md"
+                >
+                    <ShipyardIcon className="w-5 h-5 mr-1" />
+                    Build {amount}
+                </Button>
+            </div>
         </div>
     </Card>
   );
@@ -126,8 +139,9 @@ const ShipyardView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.values(UnitType).filter(type => UNIT_DATA[type]).map(type => (
-                    <UnitCard key={type} type={type} />
+                {Object.values(UnitType).filter(type => UNIT_DATA[type as UnitType]).map(type => (
+// FIX: Cast string from Object.values to UnitType to match component prop type.
+                    <UnitCard key={type} type={type as UnitType} />
                 ))}
             </div>
         </div>

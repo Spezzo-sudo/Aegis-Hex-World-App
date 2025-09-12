@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { usePlayerStore } from '../../types/usePlayerStore';
 import { useAuthStore } from '../../types/useAuthStore';
-import { signOutUser } from '../../services/authService';
+// import { signOutUser } from '../../services/authService';
 import { Resource } from '../../types';
 import { MetallumIcon, KristallinIcon, PlasmaCoreIcon, EnergieIcon } from '../../constants/icons';
-import { Button } from '../ui/Button';
+// import { Button } from '../ui/Button';
 
 const ResourceItem: React.FC<{ icon: React.ReactNode; value: number; capacity?: number; label: string }> = ({ icon, value, capacity, label }) => {
     const isEnergy = label === Resource.Energie;
@@ -56,13 +56,15 @@ const ResourceItem: React.FC<{ icon: React.ReactNode; value: number; capacity?: 
 export const Header: React.FC = () => {
     const { colony } = usePlayerStore();
     const { user } = useAuthStore();
-    const [isLoggingOut, setIsLoggingOut] = useState(false);
+    // const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+    /*
     const handleLogout = async () => {
         setIsLoggingOut(true);
         await signOutUser();
         // The loading state will be managed globally by the auth listener
     };
+    */
 
     if (!colony) return null;
 
@@ -87,7 +89,7 @@ export const Header: React.FC = () => {
                      <p className="text-xs text-textMuted truncate">{user?.email}</p>
                      <p className="text-sm font-semibold text-primary">{colony.name}</p>
                  </div>
-                 <Button onClick={handleLogout} isLoading={isLoggingOut} size="sm" variant="secondary">Logout</Button>
+                 {/* <Button onClick={handleLogout} isLoading={isLoggingOut} size="sm" variant="secondary">Logout</Button> */}
             </div>
         </header>
     );

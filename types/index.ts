@@ -1,130 +1,121 @@
+
+export enum GameView {
+    Base = 'base',
+    Buildings = 'buildings',
+    Map = 'map',
+    Research = 'research',
+    Shipyard = 'shipyard',
+    Alliance = 'alliance',
+    Market = 'market',
+    Simulator = 'simulator',
+}
+
 export enum Resource {
-  Metallum = 'Metallum',
-  Kristallin = 'Kristallin',
-  PlasmaCore = 'PlasmaCore',
-  Energie = 'Energie',
+    Metallum = 'Metallum',
+    Kristallin = 'Kristallin',
+    PlasmaCore = 'PlasmaCore',
+    Energie = 'Energie',
 }
 
 export enum BuildingType {
-  Schmelzwerk = 'Schmelzwerk',
-  Fraktursaege = 'Fraktursäge',
-  PlasmaSiphon = 'Plasma-Siphon',
-  Energiekern = 'Energiekern',
-  Werft = 'Werft',
-  Forschungsarchiv = 'Forschungsarchiv',
-  Speicher = 'Speicher',
-  Sensorik = 'Sensorik',
-  Dock = 'Dock',
-  Plasmakammer = 'Plasmakammer',
-  AegisSchildkuppel = 'Aegis-Schildkuppel',
+    MetallumMine = 'Metallum Mine',
+    KristallinSynthesizer = 'Kristallin Synthesizer',
+    PlasmaForge = 'Plasma Forge',
+    SolarNexus = 'Solar Nexus',
+    MetallumStorage = 'Metallum Storage',
+    KristallinStorage = 'Kristallin Storage',
+    PlasmaStorage = 'Plasma Storage',
+    ResearchLab = 'Research Lab',
+    Shipyard = 'Shipyard',
 }
 
 export enum ResearchType {
-  ReaktorOptimierung = 'Reaktor-Optimierung',
-  ExtraktionsAlgorithmen = 'Extraktions-Algorithmen',
-  HyperraumNavigation = 'Hyperraum-Navigation',
-  Schiffsarchitektur = 'Schiffsarchitektur',
-  Schildharmonie = 'Schildharmonie',
-  Tarnprotokolle = 'Tarnprotokolle',
-  Kryptologie = 'Kryptologie',
+    EnergyTechnology = 'Energy Technology',
+    LaserTechnology = 'Laser Technology',
+    IonTechnology = 'Ion Technology',
+    PlasmaTechnology = 'Plasma Technology',
+    WarpDrive = 'Warp Drive',
+    EspionageTechnology = 'Espionage Technology',
+    ComputerTechnology = 'Computer Technology',
+    Astrophysics = 'Astrophysics',
 }
 
 export enum UnitType {
-    SkimJaeger = 'Skim-Jäger',
-    AegisFregatte = 'Aegis-Fregatte',
-    SpektralBomber = 'Spektral-Bomber',
-    PhalanxKreuzer = 'Phalanx-Kreuzer',
-    NyxSpaeher = 'Nyx-Späher',
-    LeitsternTraeger = 'Leitstern-Träger',
+    LightFighter = 'Light Fighter',
+    HeavyFighter = 'Heavy Fighter',
+    Cruiser = 'Cruiser',
+    Battleship = 'Battleship',
+    ColonyShip = 'Colony Ship',
+    Recycler = 'Recycler',
+    EspionageProbe = 'Espionage Probe',
 }
 
 export enum DefenseType {
-    IonenTurm = 'Ionen-Turm',
-    PlasmaBastion = 'Plasma-Bastion',
-    SchildArray = 'Schild-Array',
+    RocketLauncher = 'Rocket Launcher',
+    LightLaser = 'Light Laser',
+    HeavyLaser = 'Heavy Laser',
+    GaussCannon = 'Gauss Cannon',
+    IonCannon = 'Ion Cannon',
+    PlasmaTurret = 'Plasma Turret',
+    SmallShieldDome = 'Small Shield Dome',
+    LargeShieldDome = 'Large Shield Dome',
 }
 
-export type GameObjectType = BuildingType | ResearchType | UnitType | DefenseType;
+export type Resources = Record<Resource, number>;
 
-export interface Cost {
-  [Resource.Metallum]?: number;
-  [Resource.Kristallin]?: number;
-  [Resource.PlasmaCore]?: number;
+export interface Building {
+    level: number;
+}
+
+export interface Research {
+    level: number;
 }
 
 export interface QueueItem {
-  id: string;
-  type: GameObjectType;
-  levelOrAmount: number; // For buildings/research level, for units amount
-  startTime: number;
-  endTime: number;
+    id: string; // unique id for the item in the queue
+    type: BuildingType | ResearchType | UnitType | DefenseType;
+    levelOrAmount: number;
+    startTime: number;
+    endTime: number;
 }
 
-export interface Building {
-  level: number;
-  energyConsumption: number;
+export interface Colony {
+    id: string;
+    name: string;
+    resources: Resources;
+    storage: Record<Resource.Metallum | Resource.Kristallin | Resource.PlasmaCore, number>;
+    buildings: Record<BuildingType, Building>;
+    research: Record<ResearchType, number>;
+    units: Record<UnitType, number>;
+    defenses: Record<DefenseType, number>;
+    buildingQueue: QueueItem[];
+    shipyardQueue: QueueItem[];
+    researchQueue: QueueItem[];
+    lastUpdated: number;
 }
 
-export interface Unit {
-    type: UnitType;
-    count: number;
-}
+export type CombatParticipant = {
+    fleet: Partial<Record<UnitType | DefenseType, number>>;
+    losses: Partial<Record<UnitType | DefenseType, number>>;
+    fleetValue: { metallum: number, kristallin: number };
+    lossesValue: { metallum: number, kristallin: number };
+};
 
 export interface CombatReport {
     id: string;
     timestamp: number;
-    attacker: string;
-    defender: string;
-    result: 'win' | 'loss' | 'draw';
-    loot: Partial<{ [key in Resource]: number }>;
-    losses: {
-        attacker: Partial<{[key in UnitType]: number}>,
-        defender: Partial<{[key in UnitType | DefenseType]: number}>
-    };
+    attacker: CombatParticipant;
+    defender: CombatParticipant;
+    winner: 'attacker' | 'defender' | 'draw';
+    rounds: CombatRound[];
+    debris: { metallum: number, kristallin: number };
 }
 
-export interface Colony {
-  id: string;
-  name: string;
-  resources: {
-    [key in Resource]: number;
-  };
-  storage: {
-    [key in Resource]?: number;
-  };
-  buildings: {
-    [key in BuildingType]?: Building;
-  };
-  research: {
-    [key in ResearchType]?: number;
-  };
-  units: {
-    [key in UnitType]?: number;
-  };
-  buildingQueue: QueueItem[];
-  researchQueue: QueueItem[];
-  shipyardQueue: QueueItem[];
-  combatLog: CombatReport[];
-}
-
-export enum GameView {
-    Base = 'Base',
-    Map = 'Map',
-    Research = 'Research',
-    Shipyard = 'Shipyard',
-    Alliance = 'Alliance',
-    Market = 'Market',
-}
-
-
-export interface HexTileData {
-  q: number;
-  r: number;
-  s: number;
-  type: string;
-  bonus?: string;
-  owner?: string;
-  isHostile?: boolean;
-  wealth?: number;
-  isExplored?: boolean;
+export interface CombatRound {
+    round: number;
+    attackerFleet: Partial<Record<UnitType | DefenseType, { count: number, shields: number, hull: number }>>;
+    defenderFleet: Partial<Record<UnitType | DefenseType, { count: number, shields: number, hull: number }>>;
+    attackerShots: number;
+    defenderShots: number;
+    log: string[];
 }

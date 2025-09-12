@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { usePlayerStore } from '../types/usePlayerStore';
 import { Card } from '../components/ui/Card';
@@ -45,8 +46,15 @@ const ResearchCard: React.FC<{ type: ResearchType }> = ({ type }) => {
                 <h4 className="text-lg font-semibold text-textHi">{data.name}</h4>
                 <p className="text-sm text-textMuted tabular-nums">Level {currentLevel}</p>
             </div>
-            <p className="text-textMuted text-xs mt-1 h-10">{data.description}</p>
+            <p className="text-textMuted text-xs mt-1 h-12">{data.description}</p>
             
+            {data.special && (
+                <div className="mt-3 pt-3 border-t border-grid/50">
+                    <h5 className="text-xs font-semibold text-primary uppercase tracking-wider">Effect</h5>
+                    <p className="text-xs text-textMuted italic mt-1">{data.special}</p>
+                </div>
+            )}
+
             <details className="mt-4 text-sm group cursor-pointer">
                 <summary className="text-xs text-textMuted group-hover:text-textHi list-none">
                     <div className="flex items-center justify-between">
@@ -107,7 +115,8 @@ const ResearchView: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {Object.values(ResearchType).map(type => (
-            <ResearchCard key={type} type={type} />
+// FIX: Cast string from Object.values to ResearchType to match component prop type.
+            <ResearchCard key={type} type={type as ResearchType} />
         ))}
       </div>
     </div>

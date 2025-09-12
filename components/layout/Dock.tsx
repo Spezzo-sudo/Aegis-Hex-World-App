@@ -1,6 +1,6 @@
 import React from 'react';
 import { GameView } from '../../types';
-import { BaseIcon, MapIcon, AllianceIcon, MarketIcon, ShipyardIcon, ResearchIcon } from '../../constants/icons';
+import { BaseIcon, BuildingsIcon, MapIcon, AllianceIcon, MarketIcon, ShipyardIcon, ResearchIcon, SimulatorIcon } from '../../constants/icons';
 
 interface NavItemProps {
   view: GameView;
@@ -20,6 +20,7 @@ const NavItem: React.FC<NavItemProps> = ({ view, label, currentView, setView, ic
       className={`flex flex-col items-center justify-center space-y-1 p-2 w-16 h-16 rounded-lg transition-all duration-200 relative group
         ${isActive 
             ? 'text-primary' 
+            // A slightly wider width for the active item to prevent layout shift with the label
             : 'text-textMuted hover:bg-surface hover:text-textHi'}
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
       `}
@@ -40,17 +41,19 @@ interface DockProps {
 
 export const Dock: React.FC<DockProps> = ({ currentView, setView }) => {
   const navItems = [
-    { view: GameView.Base, label: 'Base', icon: <BaseIcon />, disabled: false },
+    { view: GameView.Base, label: 'Dashboard', icon: <BaseIcon />, disabled: false },
+    { view: GameView.Buildings, label: 'Buildings', icon: <BuildingsIcon />, disabled: false },
     { view: GameView.Map, label: 'Map', icon: <MapIcon />, disabled: false },
     { view: GameView.Research, label: 'Research', icon: <ResearchIcon />, disabled: false },
     { view: GameView.Shipyard, label: 'Fleet', icon: <ShipyardIcon />, disabled: false },
+    { view: GameView.Simulator, label: 'Sim', icon: <SimulatorIcon />, disabled: false },
     { view: GameView.Alliance, label: 'Alliance', icon: <AllianceIcon />, disabled: true },
     { view: GameView.Market, label: 'Market', icon: <MarketIcon />, disabled: true },
   ];
 
   return (
-    <nav className="bg-surface/50 backdrop-blur-sm border-t border-grid flex items-center justify-around p-1 z-20 shrink-0">
-        <div className="flex space-x-1">
+    <nav className="bg-surface/50 backdrop-blur-sm border-t border-grid flex items-center justify-center p-1 z-20 shrink-0">
+        <div className="flex items-center justify-around w-full max-w-lg">
             {navItems.map(item => (
                 <NavItem key={item.view} {...item} currentView={currentView} setView={setView} />
             ))}

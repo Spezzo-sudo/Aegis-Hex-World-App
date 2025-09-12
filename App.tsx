@@ -1,28 +1,36 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { usePlayerStore } from './types/usePlayerStore';
 import { useAuthStore } from './types/useAuthStore';
 import BaseView from './views/BaseView';
+import BuildingsView from './views/BuildingsView';
 import MapView from './views/MapView';
 import ResearchView from './views/ResearchView';
 import ShipyardView from './views/ShipyardView';
 import AllianceView from './views/AllianceView';
 import MarketView from './views/MarketView';
 import AuthView from './views/AuthView';
+import SimulatorView from './views/SimulatorView';
 import { Header } from './components/layout/Header';
 import { Dock } from './components/layout/Dock';
 import { GameView } from './types';
-import { auth } from './services/firebase';
+// import { auth } from './services/firebase';
 // FIX: Changed import path to firebase/auth/browser to resolve module export error.
-import { onAuthStateChanged } from 'firebase/auth/browser';
-import { getPlayerColony, updatePlayerColony, createPlayerColony } from './services/playerDataService';
+// import { onAuthStateChanged } from 'firebase/auth/browser';
+// import { getPlayerColony, updatePlayerColony, createPlayerColony } from './services/playerDataService';
 import { useDebounce } from './hooks/useDebounce';
+import { useGameLoop } from './hooks/useGameLoop';
+import { initialColony } from './constants/gameData';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<GameView>(GameView.Map);
-  const { colony, setColony, clearColony } = usePlayerStore();
+  const [currentView, setCurrentView] = useState<GameView>(GameView.Base);
+  const { colony, setColony } = usePlayerStore();
   const { user, setUser, isLoading, setLoading } = useAuthStore();
   const initialLoadComplete = useRef(false);
 
+  useGameLoop(); // Activate the core game loop for resource generation and queue management.
+
+  /*
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
@@ -30,8 +38,29 @@ const App: React.FC = () => {
     });
     return () => unsubscribe();
   }, [setUser, setLoading]);
+  */
+
+  // Mock auth and data loading to bypass login
+  useEffect(() => {
+    const mockUser = {
+        uid: 'mock-user-01',
+        email: 'commander@aegis.net',
+    };
+    // Cast to any to satisfy the User type from firebase, which is complex.
+    // The app only uses uid and email.
+    setUser(mockUser as any);
+    setLoading(false);
+
+    const mockColony = {
+        ...initialColony,
+        id: mockUser.uid,
+        name: "Commander's Bastion",
+    };
+    setColony(mockColony);
+  }, [setUser, setLoading, setColony]);
   
   // Load player data on login, clear on logout
+  /*
   useEffect(() => {
     if (user) {
       initialLoadComplete.current = false; // Reset save guard on new login
@@ -49,6 +78,7 @@ const App: React.FC = () => {
       clearColony();
     }
   }, [user, setColony, clearColony]);
+  */
 
   // Debounce colony state for saving to Firestore to batch rapid updates.
   const debouncedColony = useDebounce(colony, 5000);
@@ -68,13 +98,15 @@ const App: React.FC = () => {
     }
     
     // For all subsequent changes, save to the database.
-    updatePlayerColony(user.uid, debouncedColony);
+    // updatePlayerColony(user.uid, debouncedColony);
   }, [debouncedColony, user]);
 
   const renderView = () => {
     switch (currentView) {
       case GameView.Base:
         return <BaseView />;
+      case GameView.Buildings:
+        return <BuildingsView />;
       case GameView.Map:
         return <MapView />;
       case GameView.Research:
@@ -85,6 +117,8 @@ const App: React.FC = () => {
         return <AllianceView />;
       case GameView.Market:
         return <MarketView />;
+      case GameView.Simulator:
+        return <SimulatorView />;
       default:
         return <BaseView />;
     }
