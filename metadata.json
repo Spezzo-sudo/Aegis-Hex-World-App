@@ -1,0 +1,5 @@
+{
+  "name": "Aegis Hex",
+  "description": "A mobile-ready browser game that is a multiplayer hex-map base builder with timed production, research, fleets, alliances, and a player market. This application provides the full frontend experience, ready to be connected to a Firebase backend.",
+  "requestFramePermissions": []
+}
