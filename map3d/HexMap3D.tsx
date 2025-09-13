@@ -135,18 +135,33 @@ function HexInstances({ hexData, selectedCoords, onHexClick }: Props) {
 const PanController = () => {
     const { camera, gl } = useThree();
     const controlsRef = useRef<any>();
+
+    // FIX: The original drag logic was flawed, causing accelerating panning.
+    // This revised implementation stores the initial camera and target positions
+    // on drag start and calculates the new position based on the drag offset
+    // from those initial points, resulting in correct 1:1 panning. This likely
+    // resolves the cryptic error by preventing state corruption from runaway values.
+    const initialPositions = useRef({ cam: new THREE.Vector3(), target: new THREE.Vector3() });
     
     useDrag(
         ({ offset: [dx, dy], pinching, first, last }) => {
             if (pinching || !controlsRef.current?.target) return;
              if (first) {
                 controlsRef.current.enabled = false;
+                initialPositions.current.cam.copy(camera.position);
+                initialPositions.current.target.copy(controlsRef.current.target);
             }
-            const target = controlsRef.current.target as THREE.Vector3;
-            const newPos = new THREE.Vector3(-dx / 100, 0, -dy / 100).add(target);
             
-            camera.position.set(newPos.x, camera.position.y, newPos.z);
-            target.set(newPos.x, newPos.y, newPos.z);
+            const newCamX = initialPositions.current.cam.x - dx / 100;
+            const newCamZ = initialPositions.current.cam.z - dy / 100;
+            const newTargetX = initialPositions.current.target.x - dx / 100;
+            const newTargetZ = initialPositions.current.target.z - dy / 100;
+
+            camera.position.x = newCamX;
+            camera.position.z = newCamZ;
+            controlsRef.current.target.x = newTargetX;
+            controlsRef.current.target.z = newTargetZ;
+            
             if (last) {
                 controlsRef.current.enabled = true;
             }
