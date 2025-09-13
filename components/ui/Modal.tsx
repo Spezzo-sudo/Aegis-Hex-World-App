@@ -25,7 +25,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
           <h2 className="text-xl font-bold text-textHi">{title}</h2>
           <button 
             onClick={onClose} 
-            className="text-textMuted hover:text-textHi transition-colors"
+            className="text-textMuted hover:text-textHi"
             aria-label="Close modal"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

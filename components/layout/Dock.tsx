@@ -17,7 +17,7 @@ const NavItem: React.FC<NavItemProps> = ({ view, label, currentView, setView, ic
     <button
       onClick={() => setView(view)}
       disabled={disabled}
-      className={`flex flex-col items-center justify-center space-y-1 p-2 w-20 h-16 rounded-lg transition-all duration-200 relative group
+      className={`flex flex-col items-center justify-center space-y-1 p-2 w-20 h-16 rounded-lg relative group
         ${isActive 
             ? 'text-primary' 
             : 'text-textMuted hover:bg-surface hover:text-textHi'}

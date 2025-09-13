@@ -59,7 +59,7 @@ const ResearchCard: React.FC<{ type: ResearchType }> = ({ type }) => {
                 <summary className="text-xs text-textMuted group-hover:text-textHi list-none">
                     <div className="flex items-center justify-between">
                         <span>Research Level {targetLevel}</span>
-                         <ChevronUpIcon className="w-4 h-4 transition-transform duration-200 group-open:rotate-180" />
+                         <ChevronUpIcon className="w-4 h-4 group-open:rotate-180" />
                     </div>
                 </summary>
                 <div className="mt-2 border-t border-grid pt-2 space-y-1 text-textMuted">
@@ -115,7 +115,6 @@ const ResearchView: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {Object.values(ResearchType).map(type => (
-// FIX: Cast string from Object.values to ResearchType to match component prop type.
             <ResearchCard key={type} type={type as ResearchType} />
         ))}
       </div>

@@ -15,7 +15,7 @@ export const Button: React.FC<ButtonProps> = ({
   className,
   ...props
 }) => {
-  const baseStyles = 'font-semibold rounded-lg transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-bg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseStyles = 'font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-bg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variantStyles = {
     primary: 'bg-primary text-bg hover:bg-primary/90 focus:ring-primary',

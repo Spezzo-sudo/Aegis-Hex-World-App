@@ -1,20 +1,16 @@
+
 import React, { useMemo, useRef, useState, useEffect, Suspense } from 'react';
 import * as THREE from 'three';
-import { Canvas, useThree, extend } from '@react-three/fiber';
-import { OrbitControls, Environment, useGLTF } from '@react-three/drei';
+import { Canvas, useThree } from '@react-three/fiber';
+import { OrbitControls, Environment } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import { useDrag } from '@use-gesture/react';
-import { Planet, PlanetType } from '../types';
-import { HexContents } from './HexContents';
+// FIX: Import HexContents and shared helpers from the updated HexContents.tsx file.
+import { HexContents, axialToWorld, HEX_R, S3 } from './HexContents';
+// FIX: Import HexData as a type from HexContents.tsx to break the circular dependency.
+import type { HexData } from './HexContents';
 
 // Coordinate systems and constants
-const HEX_R = 0.5;
-const S3 = Math.sqrt(3);
-
-export const axialToWorld = (q: number, r: number): THREE.Vector3 => {
-    return new THREE.Vector3(S3 * HEX_R * (q + r / 2), 0, (HEX_R * 3 / 2) * r);
-};
-
 const axial_to_oddq = (q: number, r: number) => {
     const x = q;
     const y = r + (q - (q & 1)) / 2;
@@ -29,15 +25,6 @@ const glowGeo = new THREE.PlaneGeometry(S3 * HEX_R, 2 * HEX_R);
 glowGeo.rotateX(-Math.PI / 2);
 glowGeo.rotateZ(Math.PI / 6);
 
-// Data types
-export type HexData = {
-    q: number;
-    r: number;
-    planet: Planet;
-    discovered: boolean;
-    isHome: boolean;
-};
-
 type Props = {
     hexData: HexData[];
     selectedCoords?: { q: number; r: number } | null;
@@ -48,7 +35,8 @@ type Props = {
 function HexInstances({ hexData, selectedCoords, onHexClick }: Props) {
     const mesh = useRef<THREE.InstancedMesh>(null!);
     const glowMesh = useRef<THREE.InstancedMesh>(null!);
-    const { raycaster, camera, size } = useThree();
+    // FIX: Destructure `gl` from `useThree` to access the renderer instance.
+    const { raycaster, camera, size, gl } = useThree();
     const [hovered, setHovered] = useState<number | null>(null);
 
     const n = hexData.length;
@@ -92,10 +80,10 @@ function HexInstances({ hexData, selectedCoords, onHexClick }: Props) {
         }
         glowMesh.current.count = glowCount;
         mesh.current.instanceMatrix.needsUpdate = true;
-        mesh.current.instanceColor!.needsUpdate = true;
+        if (mesh.current.instanceColor) mesh.current.instanceColor.needsUpdate = true;
         glowMesh.current.instanceMatrix.needsUpdate = true;
-        glowMesh.current.instanceColor!.needsUpdate = true;
-    }, [hexData, hovered, selectedCoords, n]);
+        if (glowMesh.current.instanceColor) glowMesh.current.instanceColor.needsUpdate = true;
+    }, [hexData, hovered, selectedCoords, n, dummy, color]);
 
     useEffect(() => {
         const handlePointerMove = (event: PointerEvent) => {
@@ -121,13 +109,15 @@ function HexInstances({ hexData, selectedCoords, onHexClick }: Props) {
             }
         }
 
-        window.addEventListener('pointermove', handlePointerMove);
-        window.addEventListener('click', handleClick);
+        // FIX: Use `gl.domElement` instead of `camera.gl.domElement` to get the canvas for event listeners.
+        const canvas = size.width > 0 ? gl.domElement : window;
+        canvas.addEventListener('pointermove', handlePointerMove as EventListener);
+        canvas.addEventListener('click', handleClick as EventListener);
         return () => {
-            window.removeEventListener('pointermove', handlePointerMove);
-            window.removeEventListener('click', handleClick);
+            canvas.removeEventListener('pointermove', handlePointerMove as EventListener);
+            canvas.removeEventListener('click', handleClick as EventListener);
         };
-    }, [camera, raycaster, size, onHexClick, hexData, hovered]);
+    }, [camera, raycaster, size, onHexClick, hexData, hovered, gl]);
 
     return (
         <>
@@ -143,21 +133,28 @@ function HexInstances({ hexData, selectedCoords, onHexClick }: Props) {
 
 // Draggable plane for Google Maps-style panning
 const PanController = () => {
-    const { camera, controls } = useThree();
+    const { camera, gl } = useThree();
+    const controlsRef = useRef<any>();
     
     useDrag(
-        ({ offset: [dx, dy], pinching }) => {
-            if (pinching || !controls) return;
-            const target = (controls as any).target as THREE.Vector3;
+        ({ offset: [dx, dy], pinching, first, last }) => {
+            if (pinching || !controlsRef.current?.target) return;
+             if (first) {
+                controlsRef.current.enabled = false;
+            }
+            const target = controlsRef.current.target as THREE.Vector3;
             const newPos = new THREE.Vector3(-dx / 100, 0, -dy / 100).add(target);
             
             camera.position.set(newPos.x, camera.position.y, newPos.z);
             target.set(newPos.x, newPos.y, newPos.z);
+            if (last) {
+                controlsRef.current.enabled = true;
+            }
         },
-        { eventOptions: { passive: false } }
+        { target: gl.domElement }
     );
     
-    return null;
+    return <OrbitControls ref={controlsRef} enableDamping dampingFactor={0.1} rotateSpeed={0.5} minDistance={5} maxDistance={25} minPolarAngle={Math.PI / 8} maxPolarAngle={Math.PI / 2.5} enablePan={false} />;
 };
 
 
@@ -175,17 +172,6 @@ export default function HexMap3D({ hexData, selectedCoords, onHexClick }: Props)
                 <HexContents hexData={hexData} />
             </Suspense>
 
-            <OrbitControls
-                enableDamping
-                dampingFactor={0.1}
-                rotateSpeed={0.5}
-                minDistance={5}
-                maxDistance={25}
-                minPolarAngle={Math.PI / 8}
-                maxPolarAngle={Math.PI / 2.5}
-                enablePan={false} // Disable default panning
-            />
-            
             <PanController />
             
             <EffectComposer>

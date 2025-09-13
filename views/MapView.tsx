@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { usePlayerStore } from '../types/usePlayerStore';
 import { gameService } from '../services/gameService';
@@ -8,7 +9,8 @@ import { DispatchFleetModal } from '../components/game/DispatchFleetModal';
 import { MetallumIcon, KristallinIcon, SkullIcon } from '../constants/icons';
 import { generatePlanetLore } from '../services/geminiService';
 import HexMap3D from '../map3d/HexMap3D';
-import type { HexData } from '../map3d/HexMap3D';
+// FIX: Import HexData from '../map3d/HexContents' to resolve module not found error and circular dependency.
+import type { HexData } from '../map3d/HexContents';
 
 // Helper function to convert from the game's offset coordinates to axial coordinates for the 3D map
 const oddq_to_axial = (x: number, y: number) => {

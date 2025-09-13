@@ -54,7 +54,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ startTime, endTime, on
             </div>
             <div className="w-full bg-primary/10 rounded-full h-2.5 relative overflow-hidden">
                 <div 
-                    className="bg-primary h-full rounded-full transition-all duration-1000 ease-linear relative" 
+                    className="bg-primary h-full rounded-full relative" 
                     style={{ width: `${progress}%` }}>
                       <div className="absolute top-0 left-0 h-1/2 w-full bg-white/20 rounded-t-full"></div>
                 </div>

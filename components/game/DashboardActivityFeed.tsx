@@ -17,7 +17,7 @@ const CombatReportFeedItem: React.FC<{report: CombatReport, onClick: () => void}
     const color = isWin ? 'text-primary' : 'text-red-400';
     
     return (
-        <button onClick={onClick} className="w-full text-left bg-bg/50 p-3 rounded-lg border border-grid hover:border-primary/50 transition">
+        <button onClick={onClick} className="w-full text-left bg-bg/50 p-3 rounded-lg border border-grid hover:border-primary/50">
             <div className="flex items-center text-sm mb-1">
                 <AttackIcon className={`w-5 h-5 mr-2 ${color}`}/>
                 <span className={`font-semibold ${color}`}>{title}</span>
