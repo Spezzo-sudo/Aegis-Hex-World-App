@@ -1,108 +1,325 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Aegis Hex</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'bg': '#070E18',
-              'surface': '#0B1422',
-              'grid': '#1B2A3E',
-              'primary': '#2CE2C7',
-              'secondary': '#7AA2FF',
-              'textHi': '#E6F3FF',
-              'textMuted': '#9CB3D1',
-              'alliance-a': '#2CE2C7',
-              'alliance-b': '#7AA2FF',
-              'alliance-c': '#FF7AE6',
-            }
-          }
-        }
-      }
-    </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: #070E18;
-        background-image:
-            radial-gradient(ellipse at 70% 30%, rgba(44, 226, 199, 0.08), transparent 50%),
-            radial-gradient(ellipse at 30% 70%, rgba(122, 162, 255, 0.08), transparent 50%);
-      }
-      .tabular-nums {
-        font-variant-numeric: tabular-nums;
-      }
-      /* Nebula Slate scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #070E18; /* bg */
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #1B2A3E; /* grid */
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #2CE2C7; /* primary */
-      }
-      @keyframes fade-in {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      .animate-fade-in {
-        animation: fade-in 0.5s ease-out forwards;
-      }
-
-      /* Parallax starfield */
-      .starfield { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-      .stars1 { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000"><circle cx="50" cy="50" r="0.5" fill="white" opacity="0.4"/><circle cx="150" cy="200" r="0.5" fill="white" opacity="0.6"/><circle cx="300" cy="100" r="0.5" fill="white" opacity="0.5"/><circle cx="450" cy="450" r="0.5" fill="white" opacity="0.4"/><circle cx="600" cy="300" r="0.5" fill="white" opacity="0.6"/><circle cx="800" cy="150" r="0.5" fill="white" opacity="0.5"/><circle cx="950" cy="400" r="0.5" fill="white" opacity="0.3"/></svg>'); animation: move-stars 150s linear infinite; }
-      .stars2 { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000"><circle cx="100" cy="300" r="0.8" fill="white" opacity="0.5"/><circle cx="200" cy="150" r="0.8" fill="white" opacity="0.7"/><circle cx="350" cy="250" r="0.8" fill="white" opacity="0.4"/><circle cx="500" cy="500" r="0.8" fill="white" opacity="0.5"/><circle cx="700" cy="350" r="0.8" fill="white" opacity="0.7"/><circle cx="900" cy="200" r="0.8" fill="white" opacity="0.4"/></svg>'); animation: move-stars 100s linear infinite; }
-      .stars3 { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000"><circle cx="200" cy="200" r="1.2" fill="white" opacity="0.8"/><circle cx="50" cy="350" r="1.2" fill="white" opacity="0.9"/><circle cx="300" cy="50" r="1.2" fill="white" opacity="0.7"/><circle cx="550" cy="400" r="1.2" fill="white" opacity="0.8"/><circle cx="750" cy="100" r="1.2" fill="white" opacity="0.9"/><circle cx="900" cy="450" r="1.2" fill="white" opacity="0.7"/></svg>'); animation: move-stars 50s linear infinite; }
-      
-      @keyframes move-stars { 
-        from { transform: translateX(0); } 
-        to { transform: translateX(-1000px); } 
-      }
-
-      /* Resource pulse animation */
-      @keyframes pulse-anim { 
-        0% { transform: scale(1); } 
-        50% { transform: scale(1.15); color: #E6F3FF; } 
-        100% { transform: scale(1); } 
-      }
-      .pulse-resource { 
-        animation: pulse-anim 0.4s ease-out; 
-      }
-    </style>
-  <script type="importmap">
+<script type="importmap">
 {
   "imports": {
     "zustand": "https://aistudiocdn.com/zustand@^5.0.8",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
     "react/": "https://aistudiocdn.com/react@^19.1.1/",
     "react": "https://aistudiocdn.com/react@^19.1.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.19.0",
-    "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
-    "firebase/auth/browser": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
-    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js",
+    "uuid": "https://aistudiocdn.com/uuid@^13.0.0",
     "firebase/": "https://aistudiocdn.com/firebase@^12.2.1/",
-    "uuid": "https://aistudiocdn.com/uuid@^13.0.0"
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.19.0",
+    "three": "https://aistudiocdn.com/three@^0.168.0",
+    "@react-three/fiber": "https://aistudiocdn.com/@react-three/fiber@^9.1.7",
+    "@react-three/drei": "https://aistudiocdn.com/@react-three/drei@^10.0.3",
+    "@react-three/postprocessing": "https://aistudiocdn.com/@react-three/postprocessing@^3.0.4",
+    "@use-gesture/react": "https://aistudiocdn.com/@use-gesture/react@^10.3.1"
   }
 }
 </script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis Hex</title>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <style>
+        @tailwind base;
+        @tailwind components;
+        @tailwind utilities;
+
+        :root {
+            --font-sans: 'Inter', sans-serif;
+            font-family: var(--font-sans);
+            font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+            
+            --color-bg: #0D1017;
+            --color-surface: #11151C;
+            --color-grid: #202631;
+            
+            --color-primary: #22d3ee;
+            --color-secondary: #a78bfa;
+
+            --color-textHi: #f8fafc;
+            --color-textMed: #94a3b8;
+            --color-textLo: #475569;
+            
+            --color-alliance-a: #f43f5e;
+            --color-alliance-b: #ec4899;
+            --color-alliance-c: #d946ef;
+            --color-alliance-d: #a855f7;
+            
+            --hex-width: 120px;
+            --hex-height: 138.56px; /* width * sqrt(3) / 2 * 2 = 120 * 1.1547 */
+            --hex-elevation: 12px; /* Default elevation, will be overridden by style prop */
+            --hex-border: 1.5px;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-textMed);
+        }
+
+        /* Starfield Background */
+        @keyframes move-twink-back { from {background-position:0 0;} to {background-position:-10000px 5000px;} }
+        .starfield { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; display: block; }
+        .stars1 { background: transparent url(https://www.script-tutorials.com/demos/360/images/stars.png) repeat top center; z-index: 0; animation: move-twink-back 200s linear infinite; }
+        .stars2 { background: transparent url(https://www.script-tutorials.com/demos/360/images/twinkling.png) repeat top center; z-index: 1; animation: move-twink-back 100s linear infinite; }
+        .stars3 { background: transparent url(https://www.script-tutorials.com/demos/360/images/clouds.png) repeat top center; z-index: 2; }
+
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--color-bg); }
+        ::-webkit-scrollbar-thumb { background-color: var(--color-grid); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--color-textLo); }
+        
+        /* Fade-in Animation */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        
+        /* Resource Pulse */
+        @keyframes pulse-resource {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); color: var(--color-primary); }
+            100% { transform: scale(1); }
+        }
+        .pulse-resource { animation: pulse-resource 0.4s ease-in-out; }
+
+        /* Map Grid and Hexagon Styles */
+        .map-grid-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            cursor: grab;
+        }
+        .map-grid-container:active {
+            cursor: grabbing;
+        }
+
+        .map-background {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--color-grid) 1px, transparent 1px),
+                linear-gradient(to right, var(--color-grid) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.3;
+        }
+
+        .map-grid {
+            position: relative;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .hex-container {
+            position: absolute;
+            width: var(--hex-width);
+            height: var(--hex-height);
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.2s ease-out;
+            z-index: 1;
+        }
+
+        .hex-container:hover {
+            transform: translateY(-10px) translateZ(20px);
+            z-index: 10;
+        }
+
+        .hex-base, .hex-surface {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+
+        .hex-base {
+            background: #11141a; /* Darker base for more contrast */
+            transform: translateY(var(--hex-elevation)) translateZ(-1px) rotateX(-90deg) ;
+            transform-origin: bottom center;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%231a1f29' fill-opacity='0.2' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .hex-surface {
+            background-color: #333;
+            transform: translateZ(var(--hex-elevation));
+            transition: all 0.2s ease-out;
+            box-shadow: 0 15px 25px rgba(0,0,0,0.4), inset 0 0 15px rgba(255,255,255,0.05);
+            overflow: hidden;
+        }
+        
+        /* Subtle inset highlight for more depth */
+        .hex-surface::before {
+            content: '';
+            position: absolute;
+            inset: 1.5px;
+            clip-path: inherit;
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(0,0,0,0.05));
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .hex-container:hover .hex-surface {
+            transform: translateZ(calc(var(--hex-elevation) + 5px)) rotateX(-5deg);
+            box-shadow: 0 25px 35px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,255,255,0.1);
+        }
+
+        .hex-coords {
+            position: absolute;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: var(--color-textHi);
+            opacity: 0;
+            transition: opacity 0.2s;
+            background-color: rgba(0,0,0,0.5);
+            padding: 1px 4px;
+            border-radius: 3px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .hex-container.is-visible:hover .hex-coords {
+            opacity: 1;
+        }
+        
+        .hex-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -60%);
+            z-index: 4;
+            pointer-events: none;
+            opacity: 0.7;
+            transition: all 0.2s ease-out;
+        }
+        .hex-container:hover .hex-icon {
+            opacity: 1;
+            transform: translate(-50%, -60%) scale(1.1);
+        }
+
+        .feature-icon {
+            width: 2.5rem; /* 40px */
+            height: 2.5rem; /* 40px */
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+        }
+
+        /* Fog of War Styling */
+        .fog-of-war {
+            transform: scale(0.95);
+            z-index: 0;
+        }
+        .fog-of-war .hex-surface {
+            background: radial-gradient(circle at center, #202631 0%, #11151C 80%);
+            opacity: 0.9;
+            box-shadow: none;
+        }
+        .fog-of-war .hex-surface::before {
+            display: none; /* No highlight on fog */
+        }
+         .fog-of-war:hover {
+            transform: translateY(-5px) translateZ(10px) scale(0.95);
+        }
+        .fog-of-war:hover .hex-surface {
+             opacity: 1;
+             background: radial-gradient(circle at center, #2c3442 0%, #1a1f29 80%);
+        }
+
+        /* Planet Type Colors & Effects */
+        .planet-Terran .hex-surface { background: radial-gradient(circle, #5eead4, #0d9488); }
+        .planet-Volcanic .hex-surface { background: radial-gradient(circle, #fb7185, #e11d48); }
+        .planet-Ice .hex-surface { background: radial-gradient(circle, #93c5fd, #3b82f6); }
+        .planet-GasGiant .hex-surface { background: radial-gradient(circle, #c4b5fd, #8b5cf6); }
+        .planet-AsteroidField .hex-surface { background: radial-gradient(circle, #94a3b8, #475569); }
+        .planet-Barren .hex-surface { background: radial-gradient(circle, #a8a29e, #57534e); }
+        
+        /* Cloud Layer */
+        @keyframes drift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        .cloud-layer {
+            position: absolute;
+            inset: 0;
+            background: url('https://static.vecteezy.com/system/resources/previews/022/492/944/original/dense-fog-and-smoke-overlay-and-cloud-on-a-black-background-free-png.png');
+            background-size: 200% 100%;
+            background-blend-mode: screen;
+            opacity: 0.2;
+            animation: drift 30s linear infinite alternate;
+            pointer-events: none;
+        }
+        .fog-of-war .cloud-layer {
+            display: none;
+        }
+
+        /* Home Base, Pirate Base & Biome Effects */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px 2px var(--glow-color), inset 0 0 10px var(--glow-color); }
+            50% { box-shadow: 0 0 20px 5px var(--glow-color), inset 0 0 15px var(--glow-color); }
+        }
+        .home-base .hex-surface {
+            --glow-color: rgba(56, 189, 248, 0.7);
+            animation: pulse-glow 3s infinite ease-in-out;
+            background: radial-gradient(circle, #67e8f9, #0891b2);
+        }
+        .pirate-base .hex-surface {
+            --glow-color: rgba(249, 115, 22, 0.7);
+            animation: pulse-glow 2.5s infinite ease-in-out;
+            background: radial-gradient(circle, #fb923c, #c2410c);
+        }
+        .skull-icon {
+            filter: drop-shadow(0 0 5px #f97316);
+        }
+
+        /* Glows for special resource biomes */
+        .has-glow-PlasmaCore .hex-surface {
+            --glow-color: rgba(217, 70, 239, 0.6); /* purple from alliance-c */
+            animation: pulse-glow 3.5s infinite ease-in-out;
+        }
+        .has-glow-Energie .hex-surface {
+            --glow-color: rgba(234, 179, 8, 0.6); /* yellow */
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+    </style>
+    <!-- We will use TailwindCSS from a CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: 'var(--color-bg)',
+            surface: 'var(--color-surface)',
+            grid: 'var(--color-grid)',
+            primary: 'var(--color-primary)',
+            secondary: 'var(--color-secondary)',
+            textHi: 'var(--color-textHi)',
+            textMuted: 'var(--color-textMed)',
+            textLo: 'var(--color-textLo)',
+             'alliance-a': 'var(--color-alliance-a)',
+             'alliance-b': 'var(--color-alliance-b)',
+             'alliance-c': 'var(--color-alliance-c)',
+             'alliance-d': 'var(--color-alliance-d)',
+          }
+        }
+      }
+    }
+    </script>
 </head>
-  <body class="bg-bg text-textMuted antialiased overflow-hidden">
+<body class="font-sans antialiased">
+    <script>
+        // Polyfill for browser environment to prevent crash from process.env access
+        var process = {
+            env: {
+                API_KEY: ''
+            }
+        };
+    </script>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
-  </body>
+</body>
 </html>

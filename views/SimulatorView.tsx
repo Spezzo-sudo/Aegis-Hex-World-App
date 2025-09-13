@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -10,7 +11,13 @@ import { SimulatorIcon } from '../constants/icons';
 
 type FleetComposition = Partial<{[key in UnitType | DefenseType]: number}>;
 
+const combatShips = [UnitType.SkimJaeger, UnitType.AegisFregatte, UnitType.PhalanxKreuzer, UnitType.SpektralBomber];
+const supportShips = [UnitType.Kolonieschiff, UnitType.Recycler, UnitType.NyxSpaeher];
+
+
 const FleetConfigurator: React.FC<{ title: string, fleet: FleetComposition, setFleet: (fleet: FleetComposition) => void }> = ({ title, fleet, setFleet }) => {
+
+    const ALL_UNITS_DATA = {...UNIT_DATA, ...DEFENSE_DATA};
 
     const handleUnitChange = (type: UnitType | DefenseType, count: number) => {
         const newFleet = { ...fleet };
@@ -22,47 +29,46 @@ const FleetConfigurator: React.FC<{ title: string, fleet: FleetComposition, setF
         setFleet(newFleet);
     };
 
+    const UnitInput: React.FC<{unitType: UnitType | DefenseType}> = ({ unitType }) => {
+        const data = ALL_UNITS_DATA[unitType];
+        return (
+             <div className="flex items-center justify-between space-x-2 text-sm">
+                <label htmlFor={`${title}-${unitType}`} className="text-textMuted flex-grow">{data.name}</label>
+                <input
+                    id={`${title}-${unitType}`}
+                    type="number"
+                    min="0"
+                    value={fleet[unitType] || 0}
+                    onChange={(e) => handleUnitChange(unitType, Math.max(0, parseInt(e.target.value) || 0))}
+                    className="w-20 bg-bg border border-grid rounded-md p-1 text-center tabular-nums"
+                />
+            </div>
+        )
+    };
+    
     return (
         <Card title={title} className="h-full">
-            <div className="space-y-2 max-h-[calc(100vh-400px)] overflow-y-auto pr-2">
-                <h4 className="font-semibold text-primary text-sm uppercase tracking-wider">Ships</h4>
-                {Object.values(UnitType).map(type => {
-                    const data = UNIT_DATA[type];
-                    return (
-                         <div key={type} className="flex items-center justify-between space-x-2 text-sm">
-                            <label htmlFor={`${title}-${type}`} className="text-textMuted flex-grow">{data.name}</label>
-                            <input
-                                id={`${title}-${type}`}
-                                type="number"
-                                min="0"
-// FIX: Cast string from Object.values to UnitType to correctly index the fleet object.
-                                value={fleet[type as UnitType] || 0}
-// FIX: Cast string from Object.values to UnitType before passing to handler.
-                                onChange={(e) => handleUnitChange(type as UnitType, Math.max(0, parseInt(e.target.value) || 0))}
-                                className="w-20 bg-bg border border-grid rounded-md p-1 text-center tabular-nums"
-                            />
-                        </div>
-                    )
-                })}
-                 <h4 className="font-semibold text-primary text-sm uppercase tracking-wider mt-4 pt-2 border-t border-grid">Defenses</h4>
-                 {Object.values(DefenseType).map(type => {
-                    const data = DEFENSE_DATA[type];
-                    return (
-                         <div key={type} className="flex items-center justify-between space-x-2 text-sm">
-                            <label htmlFor={`${title}-${type}`} className="text-textMuted flex-grow">{data.name}</label>
-                            <input
-                                id={`${title}-${type}`}
-                                type="number"
-                                min="0"
-// FIX: Cast string from Object.values to DefenseType to correctly index the fleet object.
-                                value={fleet[type as DefenseType] || 0}
-// FIX: Cast string from Object.values to DefenseType before passing to handler.
-                                onChange={(e) => handleUnitChange(type as DefenseType, Math.max(0, parseInt(e.target.value) || 0))}
-                                className="w-20 bg-bg border border-grid rounded-md p-1 text-center tabular-nums"
-                            />
-                        </div>
-                    )
-                })}
+            <div className="space-y-3 max-h-[calc(100vh-400px)] overflow-y-auto pr-2">
+                <div>
+                    <h4 className="font-semibold text-primary text-sm uppercase tracking-wider mb-2">Combat Ships</h4>
+                    <div className="space-y-2">
+                        {combatShips.map(type => <UnitInput key={type} unitType={type} />)}
+                    </div>
+                </div>
+                
+                <div className="pt-2">
+                    <h4 className="font-semibold text-primary text-sm uppercase tracking-wider mb-2 pt-2 border-t border-grid">Support Ships</h4>
+                    <div className="space-y-2">
+                        {supportShips.map(type => <UnitInput key={type} unitType={type} />)}
+                    </div>
+                </div>
+
+                 <div className="pt-2">
+                    <h4 className="font-semibold text-primary text-sm uppercase tracking-wider mb-2 pt-2 border-t border-grid">Defenses</h4>
+                    <div className="space-y-2">
+                        {Object.values(DefenseType).map(type => <UnitInput key={type} unitType={type} />)}
+                    </div>
+                 </div>
             </div>
         </Card>
     );
@@ -77,7 +83,8 @@ const SimulatorView: React.FC = () => {
 
     const handleSimulate = () => {
         setIsSimulating(true);
-        const combatReport = gameService.simulateCombat(attackerFleet, defenderFleet);
+        // FIX: Pass the required attacker and defender names to the simulateCombat function.
+        const combatReport = gameService.simulateCombat(attackerFleet, defenderFleet, 'Attacker', 'Defender');
         setReport(combatReport);
         setTimeout(() => setIsSimulating(false), 500); // simulate processing time
     };
@@ -100,7 +107,7 @@ const SimulatorView: React.FC = () => {
                     onClick={handleSimulate}
                     size="lg"
                     isLoading={isSimulating}
-                    disabled={Object.keys(attackerFleet).length === 0 || Object.keys(defenderFleet).length === 0}
+                    disabled={Object.keys(attackerFleet).length === 0 && Object.keys(defenderFleet).length === 0}
                 >
                     <SimulatorIcon className="w-6 h-6 mr-2" />
                     Run Simulation

@@ -13,10 +13,9 @@ import AuthView from './views/AuthView';
 import SimulatorView from './views/SimulatorView';
 import { Header } from './components/layout/Header';
 import { Dock } from './components/layout/Dock';
-import { GameView } from './types';
+import { GameView } from './types/index';
 // import { auth } from './services/firebase';
-// FIX: Changed import path to firebase/auth/browser to resolve module export error.
-// import { onAuthStateChanged } from 'firebase/auth/browser';
+// import { onAuthStateChanged } from 'firebase/auth';
 // import { getPlayerColony, updatePlayerColony, createPlayerColony } from './services/playerDataService';
 import { useDebounce } from './hooks/useDebounce';
 import { useGameLoop } from './hooks/useGameLoop';

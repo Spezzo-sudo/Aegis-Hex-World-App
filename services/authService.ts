@@ -1,13 +1,12 @@
+
+
 import { auth } from './firebase';
-// FIX: Changed import path to firebase/auth/browser to resolve module export error.
-import { 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword, 
-    signOut,
-    AuthError
-} from 'firebase/auth/browser';
+// FIX: Use named imports for Firebase auth functions and types.
+// This resolves module resolution errors where the namespace import did not work.
+import { AuthError, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { createPlayerColony } from './playerDataService';
 
+// FIX: Use AuthError type from named import.
 const getFriendlyErrorMessage = (error: AuthError): string => {
     switch (error.code) {
         case 'auth/invalid-email':
@@ -31,26 +30,46 @@ const getFriendlyErrorMessage = (error: AuthError): string => {
 
 
 export const signUpWithEmail = async (email: string, password: string) => {
+    if (!auth) {
+        return { success: false, error: "Firebase is not configured." };
+    }
     try {
+        // In Firebase v9+, auth methods are imported and the auth instance is passed as the first argument.
+        // FIX: Use function from named import.
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await createPlayerColony(userCredential.user.uid, email);
-        return { success: true, user: userCredential.user };
+        if (userCredential.user) {
+            await createPlayerColony(userCredential.user.uid, email);
+            return { success: true, user: userCredential.user };
+        }
+        return { success: false, error: 'User creation failed unexpectedly.' };
     } catch (error) {
+        // FIX: Use type from named import for casting.
         return { success: false, error: getFriendlyErrorMessage(error as AuthError) };
     }
 };
 
 export const signInWithEmail = async (email: string, password: string) => {
+    if (!auth) {
+        return { success: false, error: "Firebase is not configured." };
+    }
     try {
+        // In Firebase v9+, auth methods are imported and the auth instance is passed as the first argument.
+        // FIX: Use function from named import.
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         return { success: true, user: userCredential.user };
     } catch (error) {
+        // FIX: Use type from named import for casting.
         return { success: false, error: getFriendlyErrorMessage(error as AuthError) };
     }
 };
 
 export const signOutUser = async () => {
+    if (!auth) {
+        return { success: false, error: "Firebase is not configured." };
+    }
     try {
+        // In Firebase v9+, auth methods are imported and the auth instance is passed as the first argument.
+        // FIX: Use function from named import.
         await signOut(auth);
         return { success: true };
     } catch (error) {

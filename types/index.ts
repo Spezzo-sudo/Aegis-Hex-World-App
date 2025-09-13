@@ -1,4 +1,5 @@
 
+
 export enum GameView {
     Base = 'base',
     Buildings = 'buildings',
@@ -18,15 +19,15 @@ export enum Resource {
 }
 
 export enum BuildingType {
-    MetallumMine = 'Metallum Mine',
-    KristallinSynthesizer = 'Kristallin Synthesizer',
-    PlasmaForge = 'Plasma Forge',
-    SolarNexus = 'Solar Nexus',
-    MetallumStorage = 'Metallum Storage',
-    KristallinStorage = 'Kristallin Storage',
-    PlasmaStorage = 'Plasma Storage',
-    ResearchLab = 'Research Lab',
-    Shipyard = 'Shipyard',
+    Schmelzwerk = 'Schmelzwerk',
+    Fraktursaege = 'Fraktursäge',
+    PlasmaSiphon = 'Plasma-Siphon',
+    Energiekern = 'Energiekern',
+    MetallumSpeicher = 'Metallum Speicher',
+    KristallinSpeicher = 'Kristallin Speicher',
+    PlasmaSpeicher = 'Plasma Speicher',
+    Forschungsarchiv = 'Forschungsarchiv',
+    Werft = 'Werft',
 }
 
 export enum ResearchType {
@@ -41,25 +42,63 @@ export enum ResearchType {
 }
 
 export enum UnitType {
-    LightFighter = 'Light Fighter',
-    HeavyFighter = 'Heavy Fighter',
-    Cruiser = 'Cruiser',
-    Battleship = 'Battleship',
-    ColonyShip = 'Colony Ship',
+    SkimJaeger = 'Skim-Jäger',
+    AegisFregatte = 'Aegis-Fregatte',
+    PhalanxKreuzer = 'Phalanx-Kreuzer',
+    SpektralBomber = 'Spektral-Bomber',
+    Kolonieschiff = 'Kolonieschiff',
     Recycler = 'Recycler',
-    EspionageProbe = 'Espionage Probe',
+    NyxSpaeher = 'Nyx-Späher',
 }
 
 export enum DefenseType {
-    RocketLauncher = 'Rocket Launcher',
-    LightLaser = 'Light Laser',
-    HeavyLaser = 'Heavy Laser',
-    GaussCannon = 'Gauss Cannon',
-    IonCannon = 'Ion Cannon',
-    PlasmaTurret = 'Plasma Turret',
-    SmallShieldDome = 'Small Shield Dome',
-    LargeShieldDome = 'Large Shield Dome',
+    Raketenwerfer = 'Raketenwerfer',
+    LeichtesLasergeschuetz = 'Leichtes Lasergeschütz',
+    SchweresLasergeschuetz = 'Schweres Lasergeschütz',
+    Gausskanone = 'Gausskanone',
+    IonenTurm = 'Ionen-Turm',
+    PlasmaBastion = 'Plasma-Bastion',
+    SchildArray = 'Schild-Array',
+    AegisSchildkuppel = 'Aegis-Schildkuppel',
 }
+
+export enum MissionType {
+    Explore = 'Explore',
+    Attack = 'Attack',
+    Transport = 'Transport',
+    Colonize = 'Colonize',
+}
+
+export enum PlanetType {
+    Terran = 'Terran',
+    Volcanic = 'Volcanic',
+    Ice = 'Ice',
+    GasGiant = 'Gas Giant',
+    AsteroidField = 'Asteroid Field',
+    Barren = 'Barren',
+}
+
+export type Elevation = 'low' | 'mid' | 'high';
+
+export type FleetComposition = Partial<{[key in UnitType | DefenseType]: number}>;
+
+export interface NpcInfo {
+    type: 'pirate';
+    fleet: FleetComposition;
+    resources: Partial<Resources>; // Plunderable resources
+}
+
+export interface Planet {
+    type: PlanetType;
+    elevation: Elevation;
+    biome?: {
+        resource: Resource;
+        deltaPct: number; // e.g., 15 for +15%, -5 for -5%
+    };
+    npc?: NpcInfo;
+}
+
+export type MapData = Record<string, Planet>;
 
 export type Resources = Record<Resource, number>;
 
@@ -79,9 +118,22 @@ export interface QueueItem {
     endTime: number;
 }
 
+export interface ActiveFleet {
+    id: string;
+    units: Partial<Record<UnitType, number>>;
+    origin: { x: number; y: number };
+    destination: { x: number; y: number };
+    mission: MissionType;
+    departureTime: number;
+    arrivalTime: number;
+    returnTrip?: boolean;
+    cargo?: Partial<Resources>;
+}
+
 export interface Colony {
     id: string;
     name: string;
+    coordinates: { x: number; y: number };
     resources: Resources;
     storage: Record<Resource.Metallum | Resource.Kristallin | Resource.PlasmaCore, number>;
     buildings: Record<BuildingType, Building>;
@@ -91,6 +143,9 @@ export interface Colony {
     buildingQueue: QueueItem[];
     shipyardQueue: QueueItem[];
     researchQueue: QueueItem[];
+    activeFleets: ActiveFleet[];
+    mapVisibility: Record<string, { lastSeen: number }>; // key: "x:y"
+    combatReports: CombatReport[];
     lastUpdated: number;
 }
 
@@ -99,16 +154,19 @@ export type CombatParticipant = {
     losses: Partial<Record<UnitType | DefenseType, number>>;
     fleetValue: { metallum: number, kristallin: number };
     lossesValue: { metallum: number, kristallin: number };
+    name: string;
 };
 
 export interface CombatReport {
     id: string;
     timestamp: number;
+    coordinates: { x: number; y: number };
     attacker: CombatParticipant;
     defender: CombatParticipant;
     winner: 'attacker' | 'defender' | 'draw';
     rounds: CombatRound[];
     debris: { metallum: number, kristallin: number };
+    plunder?: Partial<Resources>;
 }
 
 export interface CombatRound {

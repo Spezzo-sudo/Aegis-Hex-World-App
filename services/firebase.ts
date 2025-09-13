@@ -1,7 +1,10 @@
-import { initializeApp } from 'firebase/app';
-// FIX: Changed import path to firebase/auth/browser to resolve module export error.
-import { getAuth } from 'firebase/auth/browser';
-import { getFirestore } from 'firebase/firestore';
+
+
+// FIX: Use named imports for Firebase v9+ SDK to resolve module errors.
+// Namespace imports were not correctly exposing types and functions.
+import { initializeApp, FirebaseApp } from 'firebase/app';
+import { getAuth, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
 // IMPORTANT: In a real production app, use environment variables for this sensitive data.
@@ -14,9 +17,24 @@ const firebaseConfig = {
   appId: "YOUR_APP_ID" // Placeholder
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Use modern v9+ SDK types
+// FIX: Use types directly from named imports.
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let db: Firestore | null = null;
 
-// Initialize Firebase Authentication and get a reference to the service
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+try {
+  // Use v9+ initialization pattern
+  // FIX: Use functions directly from named imports.
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+} catch (error) {
+    console.warn(
+        "Firebase initialization failed. This is expected if config keys are placeholders. The app will run in offline/mock mode.",
+        error
+    );
+}
+
+// Export the potentially null services. The app's logic will handle this.
+export { app, auth, db };

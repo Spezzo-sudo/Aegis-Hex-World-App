@@ -1,11 +1,17 @@
+
+
 import { create } from 'zustand';
-// FIX: Changed import path to firebase/auth/browser to resolve module export error.
-import { User } from 'firebase/auth/browser';
+// The User type should be imported from 'firebase/auth' in the v9+ modular SDK.
+// FIX: Use a named import for the User type from 'firebase/auth'.
+// This resolves the module resolution error.
+import type { User } from 'firebase/auth';
 
 interface AuthState {
+  // FIX: Use User type from the named import.
   user: User | null;
   isLoading: boolean;
   error: string | null;
+  // FIX: Use User type from the named import.
   setUser: (user: User | null) => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
