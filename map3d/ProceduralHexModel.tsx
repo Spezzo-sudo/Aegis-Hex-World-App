@@ -86,25 +86,11 @@ const ModelMesh: React.FC<{ info: MeshInfo }> = ({ info }) => {
     );
 };
 
-const ModelLight: React.FC<{ info: LightInfo }> = ({ info }) => {
-    return (
-        <pointLight
-            color={info.color}
-            intensity={info.intensity}
-            position={info.position}
-            distance={info.distance}
-        />
-    );
-}
-
 export const ProceduralHexModel: React.FC<{ description: HexModelDescription }> = ({ description }) => {
     return (
         <group>
             {description.meshes.map(meshInfo => (
                 <ModelMesh key={meshInfo.id} info={meshInfo} />
-            ))}
-            {description.lights?.map((lightInfo, index) => (
-                <ModelLight key={`light-${index}`} info={lightInfo} />
             ))}
         </group>
     );

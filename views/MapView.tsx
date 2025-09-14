@@ -9,6 +9,7 @@ import { FerrolytIcon, LuminisIcon, SkullIcon, ChevronUpIcon } from '../constant
 import { agentService } from '../services/agentService';
 import HexMap3D from '../map3d/HexMap3D';
 import type { HexData } from '../map3d/types';
+import { axialToWorld } from '../map3d/types';
 import { useContentCacheStore } from '../types/useContentCacheStore';
 
 // Helper function to convert from the game's offset coordinates to axial coordinates for the 3D map
@@ -110,8 +111,14 @@ const MapView: React.FC = () => {
     
     const togglePanel = () => setIsPanelCollapsed(prev => !prev);
 
-    const { hexData, selectedCoords } = useMemo(() => {
-        if (!colony) return { hexData: [], selectedCoords: null };
+    const { hexData, selectedCoords, homeBasePosition } = useMemo(() => {
+        if (!colony) return { hexData: [], selectedCoords: null, homeBasePosition: null };
+
+        const homeBaseKey = `${colony.coordinates.x}:${colony.coordinates.y}`;
+        const homePlanetData = mapData[homeBaseKey];
+        const homeAxial = oddq_to_axial(colony.coordinates.x, colony.coordinates.y);
+        const homePos = axialToWorld(homeAxial.q, homeAxial.r, homePlanetData?.elevationValue || 0);
+
 
         const data: HexData[] = Object.entries(mapData).map(([key, planet]) => {
             const [x, y] = key.split(':').map(Number);
@@ -130,7 +137,7 @@ const MapView: React.FC = () => {
 
         const selCoords = selectedHex ? oddq_to_axial(selectedHex.x, selectedHex.y) : null;
 
-        return { hexData: data, selectedCoords: selCoords };
+        return { hexData: data, selectedCoords: selCoords, homeBasePosition: homePos };
     }, [mapData, colony, selectedHex]);
 
     if (!colony) return null;
@@ -151,6 +158,7 @@ const MapView: React.FC = () => {
                  <HexMap3D 
                     hexData={hexData} 
                     selectedCoords={selectedCoords}
+                    homeBasePosition={homeBasePosition}
                     onHexClick={handleHexClick}
                  />
             </div>

@@ -26,7 +26,7 @@ export function AsteroidFieldModel(props: ThreeElements['group']) {
         for (let i = 0; i < ASTEROID_COUNT; i++) {
             dummy.position.set(
                 (rand() - 0.5) * 3.0, // Increased range
-                1.6 + (rand() * 1.4), // Increased height
+                0.3 + (rand() * 1.4), // Lowered to match flat map
                 (rand() - 0.5) * 3.0  // Increased range
             );
             dummy.rotation.set(

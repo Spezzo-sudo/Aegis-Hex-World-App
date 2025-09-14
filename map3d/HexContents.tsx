@@ -1,5 +1,5 @@
 /// <reference types="@react-three/fiber" />
-import React from 'react';
+import React, { useMemo } from 'react';
 import * as THREE from 'three';
 import { PlanetType } from '../types';
 import { HomeBaseModel } from './models/HomeBase';
@@ -22,31 +22,32 @@ const axial_to_oddq = (q: number, r: number) => {
 
 
 // --- UNIFIED BASE MODEL ---
-// Updated geometry to match the new HEX_R scale
-const baseTopGeo = new THREE.CylinderGeometry(HEX_R, HEX_R, 0.4, 6);
-baseTopGeo.rotateY(Math.PI / 6);
-const baseBottomGeo = new THREE.CylinderGeometry(HEX_R * 1.05, HEX_R * 1.05, 1.2, 6);
-baseBottomGeo.rotateY(Math.PI / 6);
-const topMaterial = new THREE.MeshStandardMaterial({ color: '#334155', metalness: 0.2, roughness: 0.7 });
-const bottomMaterial = new THREE.MeshStandardMaterial({ color: '#0f172a', metalness: 0.1, roughness: 0.8 });
+// A thin hex tile with a border, for a flatter map design.
+const baseGeo = new THREE.CylinderGeometry(HEX_R, HEX_R, 0.2, 6);
+baseGeo.rotateY(Math.PI / 6);
+const baseMaterial = new THREE.MeshStandardMaterial({ color: '#334155', metalness: 0.2, roughness: 0.7 });
+const borderGeo = new THREE.EdgesGeometry(baseGeo);
+const borderMaterial = new THREE.LineBasicMaterial({ color: '#475569' });
 
 const HexBaseModel: React.FC = () => (
-    <group>
-        <mesh geometry={baseBottomGeo} material={bottomMaterial} position-y={0.6} receiveShadow />
-        <mesh geometry={baseTopGeo} material={topMaterial} position-y={1.4} receiveShadow />
+    <group position-y={0.1}>
+        <mesh geometry={baseGeo} material={baseMaterial} receiveShadow />
+        <lineSegments geometry={borderGeo} material={borderMaterial} />
     </group>
 );
 
 const FogHexModel: React.FC = () => (
-    <mesh position-y={0.6} receiveShadow>
-        <cylinderGeometry args={[HEX_R, HEX_R, 1.2, 6]} />
+    <mesh position-y={0.1} receiveShadow>
+        <cylinderGeometry args={[HEX_R, HEX_R, 0.2, 6]} />
         <meshStandardMaterial color="#0D1017" roughness={0.9} metalness={0.1} />
     </mesh>
 );
 
-const deepSpaceMaterial = new THREE.MeshStandardMaterial({ color: '#05080D', metalness: 0.3, roughness: 0.6 });
+const deepSpaceMaterial = new THREE.MeshStandardMaterial({ color: '#05080D', metalness: 0.3, roughness: 0.6, transparent: true, opacity: 0.5 });
+const emptyGeo = new THREE.CylinderGeometry(HEX_R, HEX_R, 0.1, 6);
+emptyGeo.rotateY(Math.PI / 6);
 const EmptySpaceModel: React.FC = () => (
-    <mesh geometry={baseBottomGeo} material={deepSpaceMaterial} position-y={-0.2} receiveShadow />
+    <mesh geometry={emptyGeo} material={deepSpaceMaterial} position-y={0.05} receiveShadow />
 );
 
 
@@ -54,7 +55,7 @@ const gasGiantMaterial = new THREE.MeshStandardMaterial({ color: '#c4b5fd', roug
 
 // Static mapping for fallback planet types not covered by procedural generation
 const fallbackPlanetModels: Partial<Record<PlanetType, React.FC<any>>> = {
-    [PlanetType.GasGiant]: () => <PlanetWithRingModel material={gasGiantMaterial} scale={0.8} position-y={2.4} />,
+    [PlanetType.GasGiant]: () => <PlanetWithRingModel material={gasGiantMaterial} scale={0.8} position-y={1.1} />,
     [PlanetType.AsteroidField]: AsteroidFieldModel,
     [PlanetType.Barren]: BarrenModel,
 };
@@ -110,8 +111,14 @@ const HexWrapper: React.FC<{
     isSelected: boolean;
     isHovered: boolean;
 }> = ({ children, hex, onHexClick, setHoveredHex, isSelected, isHovered }) => {
-    const p = axialToWorld(hex.q, hex.r);
-    const position: [number, number, number] = [p.x, 0, p.z];
+    const p = axialToWorld(hex.q, hex.r, 0); // Flatten the map by ignoring elevationValue
+    const position: [number, number, number] = [p.x, p.y, p.z];
+
+    const randomRotationY = useMemo(() => {
+        const seed = hex.q * 31 + hex.r * 17;
+        const rand = Math.abs(Math.sin(seed) * 10000) % 6;
+        return Math.floor(rand) * (Math.PI / 3);
+    }, [hex.q, hex.r]);
     
     const clickHandler = (e: any) => {
         e.stopPropagation();
@@ -149,7 +156,9 @@ const HexWrapper: React.FC<{
                     <meshBasicMaterial color={glowColor} toneMapped={false} side={THREE.DoubleSide} />
                 </mesh>
             )}
-            {children}
+            <group rotation-y={hex.isHome ? 0 : randomRotationY}>
+                {children}
+            </group>
         </group>
     )
 }

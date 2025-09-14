@@ -29,7 +29,7 @@ const hexBaseMaterial = new THREE.MeshStandardMaterial({
     roughness: 0.7 
 });
 
-const hexBaseGeo = new THREE.CylinderGeometry(2.5, 2.5, 1, 6);
+const hexBaseGeo = new THREE.CylinderGeometry(2.5, 2.5, 0.2, 6);
 hexBaseGeo.rotateY(Math.PI / 6);
 
 export function HomeBaseModel(props: ThreeElements['group']) {
@@ -39,7 +39,7 @@ export function HomeBaseModel(props: ThreeElements['group']) {
         <mesh 
             geometry={hexBaseGeo}
             material={hexBaseMaterial}
-            position-y={3.5}
+            position-y={0.1}
             receiveShadow 
         />
 
@@ -47,7 +47,7 @@ export function HomeBaseModel(props: ThreeElements['group']) {
         <mesh
             geometry={new THREE.CylinderGeometry(1.5, 1.8, 1, 6)}
             material={baseMaterial}
-            position-y={4.5}
+            position-y={1.1}
             rotation={[0, Math.PI / 6, 0]}
             receiveShadow
             castShadow
@@ -55,14 +55,14 @@ export function HomeBaseModel(props: ThreeElements['group']) {
         <mesh
             geometry={new THREE.CylinderGeometry(1, 1.2, 1, 6)}
             material={accentMaterial}
-            position-y={5.5}
+            position-y={2.1}
             rotation={[0, Math.PI / 6, 0]}
             castShadow
         />
         <mesh
             geometry={new THREE.CylinderGeometry(0.2, 0.2, 1.5, 4)}
             material={glowMaterial}
-            position-y={6.5}
+            position-y={3.1}
             rotation={[0, Math.PI / 4, 0]}
             castShadow
         />
@@ -71,16 +71,12 @@ export function HomeBaseModel(props: ThreeElements['group']) {
         <mesh
             geometry={new THREE.SphereGeometry(2.4, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2)}
             material={domeMaterial}
-            position-y={4.0}
+            position-y={0.6}
         />
-        <mesh position-y={4.0}>
+        <mesh position-y={0.6}>
             <ringGeometry args={[2.38, 2.4, 64]} />
             <meshBasicMaterial color="#67e8f9" toneMapped={false} />
         </mesh>
-
-
-        {/* Lights */}
-        <pointLight color="#67e8f9" intensity={15} distance={15} position={[0, 5, 0]} />
     </group>
   )
 }

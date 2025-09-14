@@ -4,7 +4,7 @@ import { MAP_SIZE } from './mapData';
 const homeBaseCoords = { x: Math.floor(MAP_SIZE / 2), y: Math.floor(MAP_SIZE / 2) };
 const now = Date.now();
 const initialVisibleHexes: Colony['mapVisibility'] = {};
-const initialVisibilityRadius = 5;
+const initialVisibilityRadius = 8;
 // Make an 11x11 square around the home base visible initially
 for (let x = homeBaseCoords.x - initialVisibilityRadius; x <= homeBaseCoords.x + initialVisibilityRadius; x++) {
     for (let y = homeBaseCoords.y - initialVisibilityRadius; y <= homeBaseCoords.y + initialVisibilityRadius; y++) {

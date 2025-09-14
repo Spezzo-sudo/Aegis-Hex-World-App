@@ -118,6 +118,7 @@ export interface NpcInfo {
 export interface Planet {
     type: PlanetType;
     elevation: Elevation;
+    elevationValue?: number; // For 3D map height
     visualBiome?: BiomeType;
     biome?: {
         resource?: Resource;

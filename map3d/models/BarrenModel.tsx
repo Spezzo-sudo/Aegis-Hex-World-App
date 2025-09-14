@@ -14,7 +14,7 @@ const craterGeo2 = new THREE.TorusGeometry(0.1, 0.02, 8, 16);
 
 export function BarrenModel(props: ThreeElements['group']) {
   return (
-    <group {...props} position-y={1.6}>
+    <group {...props} position-y={0.3}>
         <mesh geometry={groundGeo} material={groundMaterial} receiveShadow />
         <mesh geometry={craterGeo1} material={craterMaterial} position={[0.3, 0.1, -0.2]} rotation-x={Math.PI / 2} />
         <mesh geometry={craterGeo2} material={craterMaterial} position={[-0.4, 0.1, 0.2]} rotation-x={Math.PI / 2} />
