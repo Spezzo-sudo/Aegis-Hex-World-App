@@ -7,12 +7,22 @@
     "react": "https://aistudiocdn.com/react@^19.1.1",
     "uuid": "https://aistudiocdn.com/uuid@^13.0.0",
     "firebase/": "https://aistudiocdn.com/firebase@^12.2.1/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.19.0",
-    "three": "https://aistudiocdn.com/three@^0.168.0",
+    "three": "https://aistudiocdn.com/three@^0.168.0/build/three.module.js",
+    "three/addons/": "https://aistudiocdn.com/three@^0.168.0/addons/",
     "@react-three/fiber": "https://aistudiocdn.com/@react-three/fiber@^9.1.7",
     "@react-three/drei": "https://aistudiocdn.com/@react-three/drei@^10.0.3",
     "@react-three/postprocessing": "https://aistudiocdn.com/@react-three/postprocessing@^3.0.4",
-    "@use-gesture/react": "https://aistudiocdn.com/@use-gesture/react@^10.3.1"
+    "@use-gesture/react": "https://aistudiocdn.com/@use-gesture/react@^10.3.1",
+    "three/": "https://aistudiocdn.com/three@^0.168.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.19.0"
+  },
+  "scopes": {
+    "https://aistudiocdn.com/@react-three/fiber@^9.1.7": {
+      "three": "https://aistudiocdn.com/three@^0.168.0/build/three.module.js"
+    },
+    "https://aistudiocdn.com/@react-three/drei@^10.0.3": {
+      "three": "https://aistudiocdn.com/three@^0.168.0/build/three.module.js"
+    }
   }
 }
 </script>
@@ -250,12 +260,20 @@
         }
 
         /* Glows for special resource biomes */
-        .has-glow-PlasmaCore .hex-surface {
+        .has-glow-Obskurit .hex-surface {
             --glow-color: rgba(217, 70, 239, 0.6); /* purple from alliance-c */
             box-shadow: 0 0 10px 2px var(--glow-color), inset 0 0 10px var(--glow-color), 0 15px 25px rgba(0,0,0,0.4), inset 0 0 15px rgba(255,255,255,0.05);
         }
-        .has-glow-Energie .hex-surface {
+        .has-glow-Luminis .hex-surface {
             --glow-color: rgba(234, 179, 8, 0.6); /* yellow */
+            box-shadow: 0 0 10px 2px var(--glow-color), inset 0 0 10px var(--glow-color), 0 15px 25px rgba(0,0,0,0.4), inset 0 0 15px rgba(255,255,255,0.05);
+        }
+        .has-glow-Ferrolyt .hex-surface {
+             --glow-color: rgba(220, 38, 38, 0.6); /* red */
+             box-shadow: 0 0 10px 2px var(--glow-color), inset 0 0 10px var(--glow-color), 0 15px 25px rgba(0,0,0,0.4), inset 0 0 15px rgba(255,255,255,0.05);
+        }
+        .has-glow-Ätherharz .hex-surface {
+            --glow-color: rgba(34, 211, 238, 0.6); /* cyan */
             box-shadow: 0 0 10px 2px var(--glow-color), inset 0 0 10px var(--glow-color), 0 15px 25px rgba(0,0,0,0.4), inset 0 0 15px rgba(255,255,255,0.05);
         }
     </style>

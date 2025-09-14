@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -11,8 +9,8 @@ import { SimulatorIcon } from '../constants/icons';
 
 type FleetComposition = Partial<{[key in UnitType | DefenseType]: number}>;
 
-const combatShips = [UnitType.SkimJaeger, UnitType.AegisFregatte, UnitType.PhalanxKreuzer, UnitType.SpektralBomber];
-const supportShips = [UnitType.Kolonieschiff, UnitType.Recycler, UnitType.NyxSpaeher];
+const combatShips = [UnitType.SkimJaeger, UnitType.AegisFregatte, UnitType.SpektralBomber, UnitType.PhalanxKreuzer, UnitType.LeitsternTraeger];
+const supportShips = [UnitType.NyxSpaeher, UnitType.AtlasTransporter, UnitType.NomadKolonieschiff];
 
 
 const FleetConfigurator: React.FC<{ title: string, fleet: FleetComposition, setFleet: (fleet: FleetComposition) => void }> = ({ title, fleet, setFleet }) => {
@@ -31,6 +29,7 @@ const FleetConfigurator: React.FC<{ title: string, fleet: FleetComposition, setF
 
     const UnitInput: React.FC<{unitType: UnitType | DefenseType}> = ({ unitType }) => {
         const data = ALL_UNITS_DATA[unitType];
+        if (!data) return null;
         return (
              <div className="flex items-center justify-between space-x-2 text-sm">
                 <label htmlFor={`${title}-${unitType}`} className="text-textMuted flex-grow">{data.name}</label>
@@ -50,21 +49,21 @@ const FleetConfigurator: React.FC<{ title: string, fleet: FleetComposition, setF
         <Card title={title} className="h-full">
             <div className="space-y-3 max-h-[calc(100vh-400px)] overflow-y-auto pr-2">
                 <div>
-                    <h4 className="font-semibold text-primary text-sm uppercase tracking-wider mb-2">Combat Ships</h4>
+                    <h4 className="font-semibold text-primary text-sm uppercase tracking-wider mb-2">Kampfeinheiten</h4>
                     <div className="space-y-2">
                         {combatShips.map(type => <UnitInput key={type} unitType={type} />)}
                     </div>
                 </div>
                 
                 <div className="pt-2">
-                    <h4 className="font-semibold text-primary text-sm uppercase tracking-wider mb-2 pt-2 border-t border-grid">Support Ships</h4>
+                    <h4 className="font-semibold text-primary text-sm uppercase tracking-wider mb-2 pt-2 border-t border-grid">Unterstützungseinheiten</h4>
                     <div className="space-y-2">
                         {supportShips.map(type => <UnitInput key={type} unitType={type} />)}
                     </div>
                 </div>
 
                  <div className="pt-2">
-                    <h4 className="font-semibold text-primary text-sm uppercase tracking-wider mb-2 pt-2 border-t border-grid">Defenses</h4>
+                    <h4 className="font-semibold text-primary text-sm uppercase tracking-wider mb-2 pt-2 border-t border-grid">Verteidigung</h4>
                     <div className="space-y-2">
                         {Object.values(DefenseType).map(type => <UnitInput key={type} unitType={type} />)}
                     </div>
@@ -83,8 +82,7 @@ const SimulatorView: React.FC = () => {
 
     const handleSimulate = () => {
         setIsSimulating(true);
-        // FIX: Pass the required attacker and defender names to the simulateCombat function.
-        const combatReport = gameService.simulateCombat(attackerFleet, defenderFleet, 'Attacker', 'Defender');
+        const combatReport = gameService.simulateCombat(attackerFleet, defenderFleet, 'Angreifer', 'Verteidiger');
         setReport(combatReport);
         setTimeout(() => setIsSimulating(false), 500); // simulate processing time
     };
@@ -93,13 +91,13 @@ const SimulatorView: React.FC = () => {
         <div className="space-y-6 animate-fade-in">
             <CombatReportModal report={report} onClose={() => setReport(null)} />
             <div>
-                <h2 className="text-3xl font-bold text-primary tracking-wider">Battle Simulator</h2>
-                <p className="text-textMuted/80">Test fleet compositions and strategies without risk.</p>
+                <h2 className="text-3xl font-bold text-primary tracking-wider">Kampfsimulator</h2>
+                <p className="text-textMuted/80">Teste Flottenzusammenstellungen und Strategien ohne Risiko.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FleetConfigurator title="Attacker Fleet" fleet={attackerFleet} setFleet={setAttackerFleet} />
-                <FleetConfigurator title="Defender Fleet" fleet={defenderFleet} setFleet={setDefenderFleet} />
+                <FleetConfigurator title="Angreifer-Flotte" fleet={attackerFleet} setFleet={setAttackerFleet} />
+                <FleetConfigurator title="Verteidiger-Flotte" fleet={defenderFleet} setFleet={setDefenderFleet} />
             </div>
 
             <div className="flex justify-center">
@@ -110,7 +108,7 @@ const SimulatorView: React.FC = () => {
                     disabled={Object.keys(attackerFleet).length === 0 && Object.keys(defenderFleet).length === 0}
                 >
                     <SimulatorIcon className="w-6 h-6 mr-2" />
-                    Run Simulation
+                    Simulation starten
                 </Button>
             </div>
         </div>

@@ -21,8 +21,9 @@ const AuthView: React.FC = () => {
             ? await signInWithEmail(email, password)
             : await signUpWithEmail(email, password);
         
-        if (!result.success) {
-            setError(result.error || 'An unknown error occurred.');
+        // FIX: Adjusted the condition to help TypeScript correctly narrow the discriminated union type of `result` and access the `error` property safely.
+        if (result.success === false) {
+            setError(result.error);
         }
         // On success, the onAuthStateChanged listener in App.tsx will handle the redirect.
         setIsLoading(false);

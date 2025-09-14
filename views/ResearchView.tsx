@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { usePlayerStore } from '../types/usePlayerStore';
 import { Card } from '../components/ui/Card';
@@ -7,7 +6,7 @@ import { ResearchType, Resource } from '../types';
 import { RESEARCH_DATA } from '../constants/gameData';
 import { calculateCost, calculateBuildTime, gameService } from '../services/gameService';
 import { ProgressBar } from '../components/ui/ProgressBar';
-import { MetallumIcon, KristallinIcon, PlasmaCoreIcon, ClockIcon, ChevronUpIcon } from '../constants/icons';
+import { FerrolytIcon, LuminisIcon, ObskuritIcon, ClockIcon, ChevronUpIcon } from '../constants/icons';
 
 const formatTime = (seconds: number) => {
     if (seconds <= 0) return '0s';
@@ -50,7 +49,7 @@ const ResearchCard: React.FC<{ type: ResearchType }> = ({ type }) => {
             
             {data.special && (
                 <div className="mt-3 pt-3 border-t border-grid/50">
-                    <h5 className="text-xs font-semibold text-primary uppercase tracking-wider">Effect</h5>
+                    <h5 className="text-xs font-semibold text-primary uppercase tracking-wider">Effekt</h5>
                     <p className="text-xs text-textMuted italic mt-1">{data.special}</p>
                 </div>
             )}
@@ -58,15 +57,15 @@ const ResearchCard: React.FC<{ type: ResearchType }> = ({ type }) => {
             <details className="mt-4 text-sm group cursor-pointer">
                 <summary className="text-xs text-textMuted group-hover:text-textHi list-none">
                     <div className="flex items-center justify-between">
-                        <span>Research Level {targetLevel}</span>
+                        <span>Forschung Level {targetLevel}</span>
                          <ChevronUpIcon className="w-4 h-4 group-open:rotate-180" />
                     </div>
                 </summary>
                 <div className="mt-2 border-t border-grid pt-2 space-y-1 text-textMuted">
-                    <div className="flex items-center justify-between"><div className="flex items-center"><MetallumIcon className="w-4 h-4 mr-2 text-textMuted/50" /> Metallum:</div> <span className="tabular-nums">{cost.Metallum || 0}</span></div>
-                    <div className="flex items-center justify-between"><div className="flex items-center"><KristallinIcon className="w-4 h-4 mr-2 text-secondary/50" /> Kristallin:</div> <span className="tabular-nums">{cost.Kristallin || 0}</span></div>
-                    <div className="flex items-center justify-between"><div className="flex items-center"><PlasmaCoreIcon className="w-4 h-4 mr-2 text-alliance-c/50" /> Plasma:</div> <span className="tabular-nums">{cost.PlasmaCore || 0}</span></div>
-                    <div className="flex items-center justify-between"><div className="flex items-center"><ClockIcon className="w-4 h-4 mr-2 text-yellow-500/50" /> Time:</div> <span className="tabular-nums">{formatTime(time)}</span></div>
+                    <div className="flex items-center justify-between"><div className="flex items-center"><FerrolytIcon className="w-4 h-4 mr-2 text-textMuted/50" /> {Resource.Ferrolyt}:</div> <span className="tabular-nums">{cost.Ferrolyt || 0}</span></div>
+                    <div className="flex items-center justify-between"><div className="flex items-center"><LuminisIcon className="w-4 h-4 mr-2 text-yellow-400/50" /> {Resource.Luminis}:</div> <span className="tabular-nums">{cost.Luminis || 0}</span></div>
+                    <div className="flex items-center justify-between"><div className="flex items-center"><ObskuritIcon className="w-4 h-4 mr-2 text-alliance-c/50" /> {Resource.Obskurit}:</div> <span className="tabular-nums">{cost.Obskurit || 0}</span></div>
+                    <div className="flex items-center justify-between"><div className="flex items-center"><ClockIcon className="w-4 h-4 mr-2 text-yellow-500/50" /> Zeit:</div> <span className="tabular-nums">{formatTime(time)}</span></div>
                 </div>
             </details>
         </div>
@@ -80,7 +79,7 @@ const ResearchCard: React.FC<{ type: ResearchType }> = ({ type }) => {
                 size="md"
             >
                 <ChevronUpIcon className="w-5 h-5 mr-1" />
-                Research
+                Forschen
             </Button>
         </div>
     </Card>
@@ -94,7 +93,7 @@ const ResearchQueue: React.FC = () => {
     if (!item) return null;
 
     return (
-        <Card title="Active Research">
+        <Card title="Aktive Forschung">
             <div className="bg-bg/50 p-3 rounded-lg border border-grid">
                 <span className="font-semibold text-textHi">{item.type} (Lvl {item.levelOrAmount})</span>
                 <ProgressBar startTime={item.startTime} endTime={item.endTime} />
@@ -107,8 +106,8 @@ const ResearchView: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h2 className="text-3xl font-bold text-primary tracking-wider">Research Archives</h2>
-        <p className="text-textMuted/80">Unlock new technologies to gain an advantage.</p>
+        <h2 className="text-3xl font-bold text-primary tracking-wider">Forschungsarchiv</h2>
+        <p className="text-textMuted/80">Schalte fortschrittliche Technologien frei, um einen strategischen Vorteil zu erlangen.</p>
       </div>
 
       <ResearchQueue />

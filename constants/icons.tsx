@@ -1,19 +1,34 @@
 import React from 'react';
 
-// FIX: Create all icon components that are used across the application.
-// These are placeholder icons from Heroicons (https://heroicons.com/)
-
-export const MetallumIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9.75l-9-5.25m9 5.25v9.75" /></svg>
+export const FerrolytIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path d="M21.2,6.3C19.9,2.6,16.2,0,12,0S4.1,2.6,2.8,6.3L2,9l10,14,10-14-0.8-2.7Z" fill="#4A5568"/>
+        <path d="M12,22L4,8.5l1.2-4.1C6.2,1.6,8.9,0,12,0s5.8,1.6,6.8,4.4L20,8.5,12,22z" fill="#2D3748"/>
+        <path d="M11,18l-1-3h6l-1.2,4L11,18z M10.1,9.5l1.9-6,1.9,6H10.1z M5,9l3,8h2.5L7,9H5z M16,17h2.5l-3-8H13L16,17z" fill="#E53E3E"/>
+    </svg>
 );
 
-export const KristallinIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25l-9-5.25-9 5.25v7.5l9 5.25 9-5.25v-7.5zM12 3v5.25m0 12.5V13.5m0-2.25L3 6l9 5.25L21 6l-9 5.25z" /></svg>
+export const LuminisIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path d="M12,0l3.09,6.26L22,7.27l-5,4.87,1.18,6.88L12,15.34,5.82,19.02,7,12.14,2,7.27l6.91-1.01L12,0Z" fill="#FBBF24"/>
+    </svg>
 );
 
-export const PlasmaCoreIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+export const ObskuritIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path d="M12,0,2,8V21H22V8L12,0Z" fill="#1A202C"/>
+        <path d="M20,19H4V9l8-6,8,6v10Z" fill="#2D3748"/>
+        <polygon points="12,3 6,9 12,15 18,9" fill="#A855F7"/>
+    </svg>
 );
+
+export const AetherharzIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path d="M12,0C7.7,0,4,3.7,4,8c0,4.4,8,16,8,16s8-11.6,8-16C20,3.7,16.3,0,12,0Z" fill="#22D3EE"/>
+        <path d="M12,4c-2.2,0-4,1.8-4,4s1.8,4,4,4,4-1.8,4-4-1.8-4-4-4Z" fill="#A0F0FF"/>
+    </svg>
+);
+
 
 export const EnergieIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>

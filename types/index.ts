@@ -1,4 +1,4 @@
-
+import { BiomeType } from '../constants/biomeData';
 
 export enum GameView {
     Base = 'base',
@@ -12,54 +12,80 @@ export enum GameView {
 }
 
 export enum Resource {
-    Metallum = 'Metallum',
-    Kristallin = 'Kristallin',
-    PlasmaCore = 'PlasmaCore',
+    Ferrolyt = 'Ferrolyt',
+    Luminis = 'Luminis',
+    Obskurit = 'Obskurit',
+    Ätherharz = 'Ätherharz',
     Energie = 'Energie',
 }
 
 export enum BuildingType {
-    Schmelzwerk = 'Schmelzwerk',
-    Fraktursaege = 'Fraktursäge',
-    PlasmaSiphon = 'Plasma-Siphon',
-    Energiekern = 'Energiekern',
-    MetallumSpeicher = 'Metallum Speicher',
-    KristallinSpeicher = 'Kristallin Speicher',
-    PlasmaSpeicher = 'Plasma Speicher',
-    Forschungsarchiv = 'Forschungsarchiv',
-    Werft = 'Werft',
+    // Resource Production
+    AetherharzExtractor = 'Ätherharz-Extraktor',
+    AetherharzRefinery = 'Ätherharz-Raffinerie',
+    FerrolytForge = 'Ferrolyt-Schmiede',
+    LuminisFormer = 'Luminis-Kristallformer',
+    ObskuritCompressor = 'Obskurit-Kompressor',
+    
+    // Energy
+    EnergyCore = 'Energiekern',
+    PlasmaChamber = 'Plasmakammer',
+
+    // Storage
+    FerrolytSilo = 'Ferrolyt-Silo',
+    LuminisSilo = 'Luminis-Silo',
+    ObskuritSilo = 'Obskurit-Silo',
+    AetherharzSilo = 'Ätherharz-Silo',
+    
+    // Construction & Tech
+    ConstructionYard = 'Bauhof',
+    Nanoforge = 'Nanoforge',
+    LogisticsHub = 'Logistik-Hub',
+    ResearchArchive = 'Forschungsarchiv',
+    TensorLab = 'Tensor-Labor',
+    CryptologySphere = 'Kryptologie-Sphäre',
+
+    // Military & Fleet
+    Shipyard = 'Werft',
+    Dock = 'Dock',
+    RepairBay = 'Reparaturbucht',
 }
 
 export enum ResearchType {
-    EnergyTechnology = 'Energy Technology',
-    LaserTechnology = 'Laser Technology',
-    IonTechnology = 'Ion Technology',
-    PlasmaTechnology = 'Plasma Technology',
-    WarpDrive = 'Warp Drive',
-    EspionageTechnology = 'Espionage Technology',
-    ComputerTechnology = 'Computer Technology',
-    Astrophysics = 'Astrophysics',
+    ReaktorOptimierung = 'Reaktor-Optimierung',
+    ExtraktionsAlgorithmen = 'Extraktions-Algorithmen',
+    HarzKatalyse = 'Harz-Katalyse',
+    HyperraumNavigation = 'Hyperraum-Navigation',
+    RelaisProtokolle = 'Relais-Protokolle',
+    Schiffsarchitektur = 'Schiffsarchitektur',
+    Schildharmonie = 'Schildharmonie',
+    Tarnprotokolle = 'Tarnprotokolle',
+    Kryptologie = 'Kryptologie',
+    IonenDurchbruch = 'Ionen-Durchbruch',
+    PlasmaLanzenfokus = 'Plasma-Lanzenfokus',
+    DrohnenschwarmKI = 'Drohnenschwarm-KI',
 }
 
 export enum UnitType {
+    // Core Fleet
     SkimJaeger = 'Skim-Jäger',
     AegisFregatte = 'Aegis-Fregatte',
-    PhalanxKreuzer = 'Phalanx-Kreuzer',
     SpektralBomber = 'Spektral-Bomber',
-    Kolonieschiff = 'Kolonieschiff',
-    Recycler = 'Recycler',
+    PhalanxKreuzer = 'Phalanx-Kreuzer',
     NyxSpaeher = 'Nyx-Späher',
+    LeitsternTraeger = 'Leitstern-Träger',
+    
+    // Utility
+    AtlasTransporter = 'Atlas-Transporter',
+    NomadKolonieschiff = 'Nomad-Kolonieschiff',
 }
 
 export enum DefenseType {
-    Raketenwerfer = 'Raketenwerfer',
-    LeichtesLasergeschuetz = 'Leichtes Lasergeschütz',
-    SchweresLasergeschuetz = 'Schweres Lasergeschütz',
-    Gausskanone = 'Gausskanone',
     IonenTurm = 'Ionen-Turm',
     PlasmaBastion = 'Plasma-Bastion',
     SchildArray = 'Schild-Array',
-    AegisSchildkuppel = 'Aegis-Schildkuppel',
+    RailLanze = 'Rail-Lanze',
+    Minenfeld = 'Minenfeld',
 }
 
 export enum MissionType {
@@ -76,6 +102,7 @@ export enum PlanetType {
     GasGiant = 'Gas Giant',
     AsteroidField = 'Asteroid Field',
     Barren = 'Barren',
+    EmptySpace = 'Empty Space',
 }
 
 export type Elevation = 'low' | 'mid' | 'high';
@@ -91,9 +118,10 @@ export interface NpcInfo {
 export interface Planet {
     type: PlanetType;
     elevation: Elevation;
+    visualBiome?: BiomeType;
     biome?: {
-        resource: Resource;
-        deltaPct: number; // e.g., 15 for +15%, -5 for -5%
+        resource?: Resource;
+        deltaPct?: number; // e.g., 15 for +15%, -5 for -5%
     };
     npc?: NpcInfo;
 }
@@ -135,7 +163,7 @@ export interface Colony {
     name: string;
     coordinates: { x: number; y: number };
     resources: Resources;
-    storage: Record<Resource.Metallum | Resource.Kristallin | Resource.PlasmaCore, number>;
+    storage: Record<Resource.Ferrolyt | Resource.Luminis | Resource.Obskurit | Resource.Ätherharz, number>;
     buildings: Record<BuildingType, Building>;
     research: Record<ResearchType, number>;
     units: Record<UnitType, number>;
@@ -152,8 +180,8 @@ export interface Colony {
 export type CombatParticipant = {
     fleet: Partial<Record<UnitType | DefenseType, number>>;
     losses: Partial<Record<UnitType | DefenseType, number>>;
-    fleetValue: { metallum: number, kristallin: number };
-    lossesValue: { metallum: number, kristallin: number };
+    fleetValue: { ferrolyt: number, luminis: number };
+    lossesValue: { ferrolyt: number, luminis: number };
     name: string;
 };
 
@@ -165,7 +193,7 @@ export interface CombatReport {
     defender: CombatParticipant;
     winner: 'attacker' | 'defender' | 'draw';
     rounds: CombatRound[];
-    debris: { metallum: number, kristallin: number };
+    debris: { ferrolyt: number, luminis: number };
     plunder?: Partial<Resources>;
 }
 
@@ -177,3 +205,10 @@ export interface CombatRound {
     defenderShots: number;
     log: string[];
 }
+// FIX: Add a mock User type to remove the dependency on Firebase auth,
+// which is causing module resolution errors. The app is designed to run in a
+// mock mode, and only uses `uid` and `email` from the user object.
+export type User = {
+    uid: string;
+    email: string | null;
+};

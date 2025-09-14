@@ -6,7 +6,7 @@ import { UnitType, DefenseType, Resource } from '../types';
 import { UNIT_DATA, DEFENSE_DATA } from '../constants/gameData';
 import { calculateCost, calculateBuildTime, gameService } from '../services/gameService';
 import { ProgressBar } from '../components/ui/ProgressBar';
-import { MetallumIcon, KristallinIcon, ClockIcon, ShipyardIcon, DefenseIcon } from '../constants/icons';
+import { FerrolytIcon, LuminisIcon, ObskuritIcon, ClockIcon, ShipyardIcon, DefenseIcon } from '../constants/icons';
 
 const formatTime = (seconds: number) => {
     if (seconds <= 0) return '0s';
@@ -50,13 +50,13 @@ const UnitCard: React.FC<{ type: UnitType }> = ({ type }) => {
             <div className="flex-grow">
                 <div className="flex justify-between items-baseline">
                     <h4 className="text-lg font-semibold text-textHi">{data.name}</h4>
-                    <p className="text-sm text-textMuted tabular-nums">Owned: {currentAmount}</p>
+                    <p className="text-sm text-textMuted tabular-nums">Besitz: {currentAmount}</p>
                 </div>
                 <p className="text-textMuted text-xs mt-1 h-12">{data.description}</p>
                 
                 <div className="mt-4 border-t border-grid pt-3">
                     <div className="flex items-center space-x-2">
-                        <label htmlFor={`amount-${type}`} className="text-sm text-textMuted">Amount:</label>
+                        <label htmlFor={`amount-${type}`} className="text-sm text-textMuted">Anzahl:</label>
                         <input 
                             type="number"
                             id={`amount-${type}`}
@@ -67,9 +67,10 @@ const UnitCard: React.FC<{ type: UnitType }> = ({ type }) => {
                         />
                     </div>
                     <div className="mt-2 space-y-1 text-textMuted text-sm">
-                        <div className="flex items-center justify-between"><div className="flex items-center"><MetallumIcon className="w-4 h-4 mr-2 text-textMuted/50" /> Metallum:</div> <span className="tabular-nums">{cost.Metallum || 0}</span></div>
-                        <div className="flex items-center justify-between"><div className="flex items-center"><KristallinIcon className="w-4 h-4 mr-2 text-secondary/50" /> Kristallin:</div> <span className="tabular-nums">{cost.Kristallin || 0}</span></div>
-                        <div className="flex items-center justify-between"><div className="flex items-center"><ClockIcon className="w-4 h-4 mr-2 text-yellow-500/50" /> Time:</div> <span className="tabular-nums">{formatTime(time)}</span></div>
+                        <div className="flex items-center justify-between"><div className="flex items-center"><FerrolytIcon className="w-4 h-4 mr-2 text-textMuted/50" /> {Resource.Ferrolyt}:</div> <span className="tabular-nums">{cost.Ferrolyt || 0}</span></div>
+                        <div className="flex items-center justify-between"><div className="flex items-center"><LuminisIcon className="w-4 h-4 mr-2 text-yellow-400/50" /> {Resource.Luminis}:</div> <span className="tabular-nums">{cost.Luminis || 0}</span></div>
+                         <div className="flex items-center justify-between"><div className="flex items-center"><ObskuritIcon className="w-4 h-4 mr-2 text-alliance-c/50" /> {Resource.Obskurit}:</div> <span className="tabular-nums">{cost.Obskurit || 0}</span></div>
+                        <div className="flex items-center justify-between"><div className="flex items-center"><ClockIcon className="w-4 h-4 mr-2 text-yellow-500/50" /> Zeit:</div> <span className="tabular-nums">{formatTime(time)}</span></div>
                     </div>
                 </div>
             </div>
@@ -83,7 +84,7 @@ const UnitCard: React.FC<{ type: UnitType }> = ({ type }) => {
                     size="md"
                 >
                     <ShipyardIcon className="w-5 h-5 mr-1" />
-                    Build {amount}
+                    Baue {amount}
                 </Button>
             </div>
         </div>
@@ -123,13 +124,13 @@ const DefenseCard: React.FC<{ type: DefenseType }> = ({ type }) => {
             <div className="flex-grow">
                 <div className="flex justify-between items-baseline">
                     <h4 className="text-lg font-semibold text-textHi">{data.name}</h4>
-                    <p className="text-sm text-textMuted tabular-nums">Built: {currentAmount}</p>
+                    <p className="text-sm text-textMuted tabular-nums">Gebaut: {currentAmount}</p>
                 </div>
                 <p className="text-textMuted text-xs mt-1 h-12">{data.description}</p>
                 
                 <div className="mt-4 border-t border-grid pt-3">
                     <div className="flex items-center space-x-2">
-                        <label htmlFor={`amount-${type}`} className="text-sm text-textMuted">Amount:</label>
+                        <label htmlFor={`amount-${type}`} className="text-sm text-textMuted">Anzahl:</label>
                         <input 
                             type="number"
                             id={`amount-${type}`}
@@ -140,9 +141,10 @@ const DefenseCard: React.FC<{ type: DefenseType }> = ({ type }) => {
                         />
                     </div>
                     <div className="mt-2 space-y-1 text-textMuted text-sm">
-                        <div className="flex items-center justify-between"><div className="flex items-center"><MetallumIcon className="w-4 h-4 mr-2 text-textMuted/50" /> Metallum:</div> <span className="tabular-nums">{cost.Metallum || 0}</span></div>
-                        <div className="flex items-center justify-between"><div className="flex items-center"><KristallinIcon className="w-4 h-4 mr-2 text-secondary/50" /> Kristallin:</div> <span className="tabular-nums">{cost.Kristallin || 0}</span></div>
-                        <div className="flex items-center justify-between"><div className="flex items-center"><ClockIcon className="w-4 h-4 mr-2 text-yellow-500/50" /> Time:</div> <span className="tabular-nums">{formatTime(time)}</span></div>
+                         <div className="flex items-center justify-between"><div className="flex items-center"><FerrolytIcon className="w-4 h-4 mr-2 text-textMuted/50" /> {Resource.Ferrolyt}:</div> <span className="tabular-nums">{cost.Ferrolyt || 0}</span></div>
+                        <div className="flex items-center justify-between"><div className="flex items-center"><LuminisIcon className="w-4 h-4 mr-2 text-yellow-400/50" /> {Resource.Luminis}:</div> <span className="tabular-nums">{cost.Luminis || 0}</span></div>
+                        <div className="flex items-center justify-between"><div className="flex items-center"><ObskuritIcon className="w-4 h-4 mr-2 text-alliance-c/50" /> {Resource.Obskurit}:</div> <span className="tabular-nums">{cost.Obskurit || 0}</span></div>
+                        <div className="flex items-center justify-between"><div className="flex items-center"><ClockIcon className="w-4 h-4 mr-2 text-yellow-500/50" /> Zeit:</div> <span className="tabular-nums">{formatTime(time)}</span></div>
                     </div>
                 </div>
             </div>
@@ -156,7 +158,7 @@ const DefenseCard: React.FC<{ type: DefenseType }> = ({ type }) => {
                     size="md"
                 >
                     <DefenseIcon className="w-5 h-5 mr-1" />
-                    Build {amount}
+                    Baue {amount}
                 </Button>
             </div>
         </div>
@@ -170,17 +172,17 @@ const ShipyardQueue: React.FC = () => {
     
     if (!colony || colony.shipyardQueue.length === 0) {
         return (
-             <Card title="Shipyard Queue">
+             <Card title="Konstruktions-Warteschlange">
                 <div className="flex flex-col items-center justify-center h-24 text-textMuted/50">
                     <ClockIcon className="w-8 h-8 mb-2" />
-                    <span>Queue is empty</span>
+                    <span>Warteschlange ist leer</span>
                 </div>
             </Card>
         );
     }
 
     return (
-        <Card title="Shipyard Queue">
+        <Card title="Konstruktions-Warteschlange">
             <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
                 {colony.shipyardQueue.filter(Boolean).map(item => (
                     <div className="bg-bg/50 p-3 rounded-lg border border-grid" key={item.id}>
@@ -200,8 +202,8 @@ const ShipyardView: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h2 className="text-3xl font-bold text-primary tracking-wider">Shipyard Control</h2>
-        <p className="text-textMuted/80">Construct your fleet and planetary defenses to project power across the sectors.</p>
+        <h2 className="text-3xl font-bold text-primary tracking-wider">Werft</h2>
+        <p className="text-textMuted/80">Konstruiere deine Flotte und Verteidigungsanlagen, um deine Macht in der Galaxie zu demonstrieren.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -211,13 +213,13 @@ const ShipyardView: React.FC = () => {
                     onClick={() => setActiveTab('fleet')}
                     className={`flex-1 p-3 font-semibold transition-colors ${activeTab === 'fleet' ? 'text-primary border-b-2 border-primary' : 'text-textMuted hover:text-textHi'}`}
                 >
-                    Fleet
+                    Flotte
                 </button>
                 <button 
                     onClick={() => setActiveTab('defenses')}
                     className={`flex-1 p-3 font-semibold transition-colors ${activeTab === 'defenses' ? 'text-primary border-b-2 border-primary' : 'text-textMuted hover:text-textHi'}`}
                 >
-                    Defenses
+                    Verteidigung
                 </button>
             </div>
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

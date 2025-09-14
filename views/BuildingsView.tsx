@@ -5,8 +5,9 @@ import { Button } from '../components/ui/Button';
 import { BuildingType, Resource } from '../types';
 import { BUILDING_DATA } from '../constants/gameData';
 import { calculateCost, calculateBuildTime, gameService } from '../services/gameService';
-import { generateBuildingLore, generateBuildingImage } from '../services/geminiService';
-import { MetallumIcon, KristallinIcon, PlasmaCoreIcon, ClockIcon, ChevronUpIcon, SparklesIcon } from '../constants/icons';
+import { agentService } from '../services/agentService';
+import { FerrolytIcon, LuminisIcon, ObskuritIcon, ClockIcon, ChevronUpIcon, SparklesIcon, AetherharzIcon } from '../constants/icons';
+import { useContentCacheStore } from '../types/useContentCacheStore';
 
 const formatTime = (seconds: number) => {
     if (seconds <= 0) return '0s';
@@ -21,13 +22,19 @@ const formatTime = (seconds: number) => {
 const BuildingCard: React.FC<{ type: BuildingType }> = ({ type }) => {
   const { colony } = usePlayerStore();
   const [isUpgrading, setIsUpgrading] = useState(false);
-  const [lore, setLore] = useState('');
+  
+  const data = BUILDING_DATA[type];
+  const { 
+      getBuildingLore, setBuildingLore, 
+      getBuildingImage, setBuildingImage 
+  } = useContentCacheStore();
+  
+  const [lore, setLore] = useState(() => getBuildingLore(data.name) || '');
   const [isLoadingLore, setIsLoadingLore] = useState(false);
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(() => getBuildingImage(data.name) || null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   
   const building = colony?.buildings[type];
-  const data = BUILDING_DATA[type];
   const currentLevel = building?.level || 0;
   const targetLevel = currentLevel + 1;
   const cost = calculateCost(type, targetLevel);
@@ -46,17 +53,29 @@ const BuildingCard: React.FC<{ type: BuildingType }> = ({ type }) => {
   };
 
   const handleGenerateLore = async () => {
+    const cachedLore = getBuildingLore(data.name);
+    if (cachedLore) {
+        setLore(cachedLore);
+        return;
+    }
     setIsLoadingLore(true);
-    const generatedLore = await generateBuildingLore(data.name, data.description);
+    const generatedLore = await agentService.lore.generateBuildingLore(data.name, data.description);
     setLore(generatedLore);
+    setBuildingLore(data.name, generatedLore);
     setIsLoadingLore(false);
   };
   
   const handleGenerateImage = async () => {
+    const cachedImage = getBuildingImage(data.name);
+    if (cachedImage) {
+        setGeneratedImage(cachedImage);
+        return;
+    }
     setIsGeneratingImage(true);
-    const imageUrl = await generateBuildingImage(data.name, data.description);
+    const imageUrl = await agentService.artwork.generateBuildingImage(type);
     if (imageUrl) {
       setGeneratedImage(imageUrl);
+      setBuildingImage(data.name, imageUrl);
     }
     setIsGeneratingImage(false);
   };
@@ -96,7 +115,7 @@ const BuildingCard: React.FC<{ type: BuildingType }> = ({ type }) => {
                 <div className="mt-2">
                     {!lore && (
                         <button onClick={handleGenerateLore} disabled={isLoadingLore} className="text-xs text-secondary hover:text-primary transition disabled:opacity-50">
-                            {isLoadingLore ? 'Scanning...' : 'Scan for Details'}
+                            {isLoadingLore ? 'Scrying...' : 'Scry for Details'}
                         </button>
                     )}
                     {lore && (
@@ -114,9 +133,10 @@ const BuildingCard: React.FC<{ type: BuildingType }> = ({ type }) => {
                         </div>
                     </summary>
                     <div className="mt-2 border-t border-grid pt-2 space-y-1 text-textMuted text-xs">
-                        <div className="flex items-center justify-between"><div className="flex items-center"><MetallumIcon className="w-4 h-4 mr-2 text-textMuted/50" /> Metallum:</div> <span className="tabular-nums">{cost.Metallum || 0}</span></div>
-                        <div className="flex items-center justify-between"><div className="flex items-center"><KristallinIcon className="w-4 h-4 mr-2 text-secondary/50" /> Kristallin:</div> <span className="tabular-nums">{cost.Kristallin || 0}</span></div>
-                        <div className="flex items-center justify-between"><div className="flex items-center"><PlasmaCoreIcon className="w-4 h-4 mr-2 text-alliance-c/50" /> Plasma:</div> <span className="tabular-nums">{cost.PlasmaCore || 0}</span></div>
+                        {cost.Ferrolyt && <div className="flex items-center justify-between"><div className="flex items-center"><FerrolytIcon className="w-4 h-4 mr-2 text-textMuted/50" /> {Resource.Ferrolyt}:</div> <span className="tabular-nums">{cost.Ferrolyt}</span></div>}
+                        {cost.Luminis && <div className="flex items-center justify-between"><div className="flex items-center"><LuminisIcon className="w-4 h-4 mr-2 text-yellow-400/50" /> {Resource.Luminis}:</div> <span className="tabular-nums">{cost.Luminis}</span></div>}
+                        {cost.Ätherharz && <div className="flex items-center justify-between"><div className="flex items-center"><AetherharzIcon className="w-4 h-4 mr-2 text-cyan-400/50" /> {Resource.Ätherharz}:</div> <span className="tabular-nums">{cost.Ätherharz}</span></div>}
+                        {cost.Obskurit && <div className="flex items-center justify-between"><div className="flex items-center"><ObskuritIcon className="w-4 h-4 mr-2 text-alliance-c/50" /> {Resource.Obskurit}:</div> <span className="tabular-nums">{cost.Obskurit}</span></div>}
                         <div className="flex items-center justify-between"><div className="flex items-center"><ClockIcon className="w-4 h-4 mr-2 text-yellow-500/50" /> Time:</div> <span className="tabular-nums">{formatTime(time)}</span></div>
                     </div>
                 </details>
@@ -143,11 +163,11 @@ const BuildingsView: React.FC = () => {
     return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h2 className="text-3xl font-bold text-primary tracking-wider">Colony Structures</h2>
-        <p className="text-textMuted/80">Construct and upgrade buildings to expand your colony.</p>
+        <h2 className="text-3xl font-bold text-primary tracking-wider">Basisstrukturen</h2>
+        <p className="text-textMuted/80">Errichte und verbessere Gebäude, um deine Kolonie zu erweitern.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
           {Object.values(BuildingType).map(type => (
               <BuildingCard key={type} type={type as BuildingType} />
           ))}

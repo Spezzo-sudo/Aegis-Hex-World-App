@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { usePlayerStore } from './types/usePlayerStore';
 import { useAuthStore } from './types/useAuthStore';
@@ -22,7 +21,7 @@ import { useGameLoop } from './hooks/useGameLoop';
 import { initialColony } from './constants/gameData';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<GameView>(GameView.Base);
+  const [currentView, setCurrentView] = useState<GameView>(GameView.Map);
   const { colony, setColony } = usePlayerStore();
   const { user, setUser, isLoading, setLoading } = useAuthStore();
   const initialLoadComplete = useRef(false);
@@ -140,7 +139,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="relative h-screen w-screen">
+    <div className="relative h-screen w-screen overflow-hidden">
       <div className="starfield stars1"></div>
       <div className="starfield stars2"></div>
       <div className="starfield stars3"></div>
@@ -157,7 +156,7 @@ const App: React.FC = () => {
       ) : (
         <div className="relative z-10 flex flex-col h-full bg-transparent text-textMuted">
           <Header />
-          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+          <main className="flex-1 overflow-hidden p-2 md:p-4 lg:p-6">
             {renderView()}
           </main>
           <Dock currentView={currentView} setView={handleViewChange} />

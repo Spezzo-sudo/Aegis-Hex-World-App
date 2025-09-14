@@ -57,15 +57,15 @@ export const calculateBuildTime = (type: Constructible, levelOrAmount: number, c
 
     if (Object.values(UnitType).includes(type as UnitType) || Object.values(DefenseType).includes(type as DefenseType)) {
         // Shipyard/Defense construction time
-        const shipyardLevel = colony.buildings[BuildingType.Werft]?.level || 1;
+        const shipyardLevel = colony.buildings[BuildingType.Shipyard]?.level || 1;
         time = (data.baseBuildTime * levelOrAmount) / (1 + shipyardLevel);
     } else {
-        const totalCost = (cost.Metallum || 0) + (cost.Kristallin || 0);
+        const totalCost = (cost.Ferrolyt || 0) + (cost.Luminis || 0);
         if (totalCost === 0) return 0;
 
         let labLevel = 1;
         if (Object.values(ResearchType).includes(type as ResearchType)) {
-            labLevel = colony.buildings[BuildingType.Forschungsarchiv]?.level || 1;
+            labLevel = colony.buildings[BuildingType.ResearchArchive]?.level || 1;
         }
         
         time = (totalCost / 2500) * (1 / (labLevel + 1)) * 3600;
@@ -106,7 +106,7 @@ const processTick = (currentColony: Colony) => {
                 if (planetData.elevation === 'high') baseProd *= 1.02;
                 // Apply biome bonus to production
                 if (planetData?.biome?.resource === Resource.Energie) {
-                     baseProd *= (1 + planetData.biome.deltaPct / 100);
+                     baseProd *= (1 + (planetData.biome.deltaPct || 0) / 100);
                 }
                 totalEnergyProduction += baseProd;
             }
@@ -127,10 +127,10 @@ const processTick = (currentColony: Colony) => {
                      let productionPerSecond = (data.baseProduction[res as Resource]! * building.level * Math.pow(1.1, building.level)) / 3600;
                      
                      if (planetData?.biome?.resource === res) {
-                        productionPerSecond *= (1 + planetData.biome.deltaPct / 100);
+                        productionPerSecond *= (1 + (planetData.biome.deltaPct || 0) / 100);
                      }
                      
-                     if (planetData.elevation === 'low' && (res === Resource.Metallum || res === Resource.Kristallin)) {
+                     if (planetData.elevation === 'low' && (res === Resource.Ferrolyt || res === Resource.Luminis)) {
                         productionPerSecond *= 1.02;
                      } else if (planetData.elevation === 'mid') {
                         productionPerSecond *= 1.01;
@@ -187,9 +187,10 @@ const processTick = (currentColony: Colony) => {
     });
 
     const newStorage = {
-      [Resource.Metallum]: (BUILDING_DATA[BuildingType.MetallumSpeicher].baseStorage || 0) * (Math.pow(1.5, newBuildings[BuildingType.MetallumSpeicher].level)) + initialColony.storage.Metallum,
-      [Resource.Kristallin]: (BUILDING_DATA[BuildingType.KristallinSpeicher].baseStorage || 0) * (Math.pow(1.5, newBuildings[BuildingType.KristallinSpeicher].level)) + initialColony.storage.Kristallin,
-      [Resource.PlasmaCore]: (BUILDING_DATA[BuildingType.PlasmaSpeicher].baseStorage || 0) * (Math.pow(1.5, newBuildings[BuildingType.PlasmaSpeicher].level)) + initialColony.storage.PlasmaCore,
+      [Resource.Ferrolyt]: (BUILDING_DATA[BuildingType.FerrolytSilo].baseStorage || 0) * (Math.pow(1.5, newBuildings[BuildingType.FerrolytSilo].level)) + initialColony.storage.Ferrolyt,
+      [Resource.Luminis]: (BUILDING_DATA[BuildingType.LuminisSilo].baseStorage || 0) * (Math.pow(1.5, newBuildings[BuildingType.LuminisSilo].level)) + initialColony.storage.Luminis,
+      [Resource.Obskurit]: (BUILDING_DATA[BuildingType.ObskuritSilo].baseStorage || 0) * (Math.pow(1.5, newBuildings[BuildingType.ObskuritSilo].level)) + initialColony.storage.Obskurit,
+      [Resource.Ätherharz]: (BUILDING_DATA[BuildingType.AetherharzSilo].baseStorage || 0) * (Math.pow(1.5, newBuildings[BuildingType.AetherharzSilo].level)) + initialColony.storage.Ätherharz,
     };
     
     // --- Fleet and Visibility Processing ---
@@ -226,10 +227,9 @@ const processTick = (currentColony: Colony) => {
                 
                 if (report.winner === 'attacker') {
                     const plunder: Partial<Resources> = {};
-                    let cargoSpace = 0; // Future implementation
                     
                     for (const res in targetPlanet.npc.resources) {
-                        plunder[res as Resource] = targetPlanet.npc.resources[res as Resource]! * 0.5;
+                        plunder[res as Resource] = (targetPlanet.npc.resources[res as Resource] || 0) * 0.5;
                     }
                     report.plunder = plunder;
 
@@ -252,8 +252,8 @@ const processTick = (currentColony: Colony) => {
                             }
                         }
 
-                        const warpDriveBonus = 1 + (currentColony.research[ResearchType.WarpDrive] * 0.1);
-                        const travelTimeMs = calculateTravelTime(fleet.destination, fleet.origin, slowestSpeed, warpDriveBonus);
+                        const hyperraumNavBonus = 1 + ((currentColony.research[ResearchType.HyperraumNavigation] || 0) * 0.1);
+                        const travelTimeMs = calculateTravelTime(fleet.destination, fleet.origin, slowestSpeed, hyperraumNavBonus);
                         
                         const returnFleet: ActiveFleet = {
                             ...fleet,
@@ -368,8 +368,8 @@ const dispatchFleet = (
     }
   }
   
-  const warpDriveBonus = 1 + (colony.research[ResearchType.WarpDrive] * 0.1);
-  const travelTimeMs = calculateTravelTime(colony.coordinates, destination, slowestSpeed, warpDriveBonus);
+  const hyperraumNavBonus = 1 + ((colony.research[ResearchType.HyperraumNavigation] || 0) * 0.1);
+  const travelTimeMs = calculateTravelTime(colony.coordinates, destination, slowestSpeed, hyperraumNavBonus);
   
   const departureTime = Date.now();
   const arrivalTime = departureTime + travelTimeMs;
@@ -392,42 +392,46 @@ const dispatchFleet = (
   return true;
 };
 
-const simulateCombat = (attackerFleet: FleetComposition, defenderFleet: FleetComposition, attackerName: string, defenderName: string): CombatReport => {
-    const getFleetValue = (fleet: FleetComposition) => {
-        let metallum = 0, kristallin = 0;
-        for (const type in fleet) {
-            const data = ALL_ITEM_DATA[type as keyof typeof ALL_ITEM_DATA];
-            const count = fleet[type as keyof typeof fleet] || 0;
-            metallum += (data.baseCost.Metallum || 0) * count;
-            kristallin += (data.baseCost.Kristallin || 0) * count;
+const getFleetValue = (fleet: FleetComposition) => {
+    if (!fleet) return { ferrolyt: 0, luminis: 0 };
+    let ferrolyt = 0, luminis = 0;
+    for (const type in fleet) {
+        const data = ALL_ITEM_DATA[type as keyof typeof ALL_ITEM_DATA];
+        const count = fleet[type as keyof typeof fleet] || 0;
+        if (data?.baseCost) {
+            ferrolyt += (data.baseCost.Ferrolyt || 0) * count;
+            luminis += (data.baseCost.Luminis || 0) * count;
         }
-        return { metallum, kristallin };
-    };
+    }
+    return { ferrolyt, luminis };
+};
 
+const calculateLosses = (fleet: FleetComposition, ratio: number) => {
+    if (!fleet) return {};
+    const losses: FleetComposition = {};
+    for(const type in fleet) {
+        losses[type as keyof typeof fleet] = Math.floor((fleet[type as keyof typeof fleet] || 0) * ratio);
+    }
+    return losses;
+};
+
+const simulateCombat = (attackerFleet: FleetComposition, defenderFleet: FleetComposition, attackerName: string, defenderName: string): CombatReport => {
     const attackerValue = Object.values(getFleetValue(attackerFleet)).reduce((a, b) => a + b, 0);
     const defenderValue = Object.values(getFleetValue(defenderFleet)).reduce((a, b) => a + b, 0);
 
-    const emptyReport = { id: uuidv4(), timestamp: Date.now(), coordinates: {x:0, y:0}, winner: 'draw' as const, attacker: { name: attackerName, fleet: {}, losses: {}, fleetValue: {metallum: 0, kristallin: 0}, lossesValue: {metallum: 0, kristallin: 0}}, defender: { name: defenderName, fleet: {}, losses: {}, fleetValue: {metallum: 0, kristallin: 0}, lossesValue: {metallum: 0, kristallin: 0}}, rounds: [], debris: { metallum: 0, kristallin: 0 }};
+    const emptyReport = { id: uuidv4(), timestamp: Date.now(), coordinates: {x:0, y:0}, winner: 'draw' as const, attacker: { name: attackerName, fleet: {}, losses: {}, fleetValue: {ferrolyt: 0, luminis: 0}, lossesValue: {ferrolyt: 0, luminis: 0}}, defender: { name: defenderName, fleet: {}, losses: {}, fleetValue: {ferrolyt: 0, luminis: 0}, lossesValue: {ferrolyt: 0, luminis: 0}}, rounds: [], debris: { ferrolyt: 0, luminis: 0 }};
 
     if (attackerValue + defenderValue === 0) return emptyReport;
     
     const attackerLossRatio = Math.min(1, defenderValue / (attackerValue * 1.2 + 1));
     const defenderLossRatio = Math.min(1, attackerValue / (defenderValue * 1.5 + 1));
 
-    const calculateLosses = (fleet: FleetComposition, ratio: number) => {
-        const losses: FleetComposition = {};
-        for(const type in fleet) {
-            losses[type as keyof typeof fleet] = Math.floor((fleet[type as keyof typeof fleet] || 0) * ratio);
-        }
-        return losses;
-    };
-
     const attackerLosses = calculateLosses(attackerFleet, attackerLossRatio);
     const defenderLosses = calculateLosses(defenderFleet, defenderLossRatio);
     const attackerLossesValue = getFleetValue(attackerLosses);
     const defenderLossesValue = getFleetValue(defenderLosses);
 
-    const winner = (attackerLossesValue.metallum + attackerLossesValue.kristallin) < (defenderLossesValue.metallum + defenderLossesValue.kristallin) ? 'attacker' : 'defender';
+    const winner = (attackerLossesValue.ferrolyt + attackerLossesValue.luminis) < (defenderLossesValue.ferrolyt + defenderLossesValue.luminis) ? 'attacker' : 'defender';
 
     return {
         id: uuidv4(),
@@ -437,7 +441,7 @@ const simulateCombat = (attackerFleet: FleetComposition, defenderFleet: FleetCom
         attacker: { name: attackerName, fleet: attackerFleet, losses: attackerLosses, fleetValue: getFleetValue(attackerFleet), lossesValue: attackerLossesValue },
         defender: { name: defenderName, fleet: defenderFleet, losses: defenderLosses, fleetValue: getFleetValue(defenderFleet), lossesValue: defenderLossesValue },
         rounds: [],
-        debris: { metallum: (attackerLossesValue.metallum + defenderLossesValue.metallum) * 0.3, kristallin: (attackerLossesValue.kristallin + defenderLossesValue.kristallin) * 0.3 },
+        debris: { ferrolyt: (attackerLossesValue.ferrolyt + defenderLossesValue.ferrolyt) * 0.3, luminis: (attackerLossesValue.luminis + defenderLossesValue.luminis) * 0.3 },
     };
 };
 
