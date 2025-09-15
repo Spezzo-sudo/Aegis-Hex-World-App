@@ -5,7 +5,7 @@ import type { Planet } from '../types';
 // Hex geometry constants
 export const HEX_R = 1.0; // Increased from 0.5 to make hexes larger
 export const S3 = Math.sqrt(3);
-export const HEX_SPACING_MULTIPLIER = 1.15; // Adjusted spacing for the new size
+export const HEX_SPACING_MULTIPLIER = 1.5; // Increased spacing for a larger map feel
 
 // Coordinate conversion helper
 export const axialToWorld = (q: number, r: number, height: number = 0): THREE.Vector3 => {

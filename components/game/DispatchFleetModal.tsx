@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal } from '../ui/Modal';
+import { Modal } from '../../Modal';
 import { usePlayerStore } from '../../types/usePlayerStore';
 import { MissionType, UnitType } from '../../types';
 import { UNIT_DATA } from '../../constants/gameData';

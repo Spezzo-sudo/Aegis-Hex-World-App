@@ -6,7 +6,7 @@ import type { ThreeElements } from '@react-three/fiber';
 const groundMaterial = new THREE.MeshStandardMaterial({ color: '#57534e', roughness: 0.9, metalness: 0.0 });
 const craterMaterial = new THREE.MeshStandardMaterial({ color: '#44403c', roughness: 1.0 });
 
-const groundGeo = new THREE.CylinderGeometry(1.0, 0.96, 0.2, 6);
+const groundGeo = new THREE.CylinderGeometry(1.0, 1.3, 0.2, 6);
 groundGeo.rotateY(Math.PI / 6);
 
 const craterGeo1 = new THREE.TorusGeometry(0.2, 0.04, 8, 16);

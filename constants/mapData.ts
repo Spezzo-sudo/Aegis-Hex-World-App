@@ -1,7 +1,7 @@
 import { PlanetType, Resource, MapData, Planet, Elevation, UnitType, DefenseType } from '../types';
 import { BiomeType } from './biomeData';
 
-export const MAP_SIZE = 31; // Must be an odd number
+export const MAP_SIZE = 35; // Must be an odd number. Increased from 31.
 
 export const PLANET_DATA: Record<PlanetType, { color: string }> = {
     [PlanetType.Terran]: { color: 'rgba(44, 226, 199, 0.15)' },
@@ -85,7 +85,7 @@ const getOctaveNoise = (x: number, y: number, octaves: number, persistence: numb
 export const generateMapData = (size: number): MapData => {
     const map: MapData = {};
     const center = Math.floor(size / 2);
-    const scale = 4.0; // Higher scale = smaller, more frequent features
+    const scale = 5.0; // Higher scale = smaller, more frequent features
 
     for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
@@ -94,8 +94,8 @@ export const generateMapData = (size: number): MapData => {
             const ny = y / size - 0.5;
 
             // Generate noise values for elevation and moisture
-            const e = getOctaveNoise(nx, ny, 4, 0.5, scale * 3);
-            const m = getOctaveNoise(nx + 100, ny + 100, 4, 0.5, scale * 2);
+            const e = getOctaveNoise(nx, ny, 5, 0.5, scale * 2);
+            const m = getOctaveNoise(nx + 100, ny + 100, 4, 0.5, scale * 2.5);
 
             // Normalize noise to 0-1 range
             const elevationValue = (e + 1) / 2;
@@ -105,19 +105,28 @@ export const generateMapData = (size: number): MapData => {
             let visualBiome: BiomeType;
             let elevation: Elevation;
             
-            if (elevationValue < 0.3) {
-                visualBiome = BiomeType.FertilePlain; // Water/Lowlands
+            if (elevationValue < 0.25) {
+                visualBiome = BiomeType.FrozenTundra;
                 elevation = 'low';
-            } else if (elevationValue < 0.6) {
-                 if (moistureValue < 0.4) visualBiome = BiomeType.Wasteland;
-                 else visualBiome = BiomeType.Forest;
-                 elevation = 'low';
+            } else if (elevationValue < 0.45) {
+                if (moistureValue < 0.35) visualBiome = BiomeType.SaltFlats;
+                else if (moistureValue < 0.65) visualBiome = BiomeType.FertilePlain;
+                else if (moistureValue < 0.85) visualBiome = BiomeType.Forest;
+                else visualBiome = BiomeType.Swamp;
+                elevation = 'low';
+            } else if (elevationValue < 0.65) {
+                 if (moistureValue < 0.2) visualBiome = BiomeType.RedDesert;
+                 else if (moistureValue < 0.4) visualBiome = BiomeType.Wasteland;
+                 else visualBiome = BiomeType.TropicalJungle;
+                 elevation = 'mid';
             } else if (elevationValue < 0.8) {
-                if (moistureValue < 0.3) visualBiome = BiomeType.LavaFlows;
-                else visualBiome = BiomeType.Mountains;
+                if (moistureValue < 0.5) visualBiome = BiomeType.Mountains;
+                else visualBiome = BiomeType.LavaFlows;
                 elevation = 'mid';
             } else {
-                visualBiome = BiomeType.CrystalSpires;
+                if (moistureValue < 0.3) visualBiome = BiomeType.ObsidianSpires;
+                else if (moistureValue < 0.6) visualBiome = BiomeType.CrystalSpires;
+                else visualBiome = BiomeType.GlowingCaves;
                 elevation = 'high';
             }
 
@@ -125,16 +134,23 @@ export const generateMapData = (size: number): MapData => {
              switch (visualBiome) {
                 case BiomeType.FertilePlain:
                 case BiomeType.Forest:
+                case BiomeType.TropicalJungle:
+                case BiomeType.Swamp:
                     planetType = PlanetType.Terran;
                     break;
                 case BiomeType.Mountains:
                 case BiomeType.Wasteland:
+                case BiomeType.SaltFlats:
+                case BiomeType.RedDesert:
                     planetType = PlanetType.Barren;
                     break;
                 case BiomeType.CrystalSpires:
+                case BiomeType.FrozenTundra:
+                case BiomeType.GlowingCaves:
                     planetType = PlanetType.Ice;
                     break;
                 case BiomeType.LavaFlows:
+                case BiomeType.ObsidianSpires:
                     planetType = PlanetType.Volcanic;
                     break;
                 default:
@@ -145,15 +161,36 @@ export const generateMapData = (size: number): MapData => {
                 type: planetType,
                 elevation,
                 visualBiome,
-                elevationValue: elevationValue * 4, // Multiplier for visual height
+                elevationValue: elevationValue * 0.3, // Reduced for a much gentler landscape
             };
         }
+    }
+
+    const specialBiomeTypes = [BiomeType.TimeRift, BiomeType.BlackHole, BiomeType.StormField, BiomeType.PrismField];
+
+    // Layer special features (must be done before resources/NPCs to avoid overwriting)
+    const specialBiomeKeys = Object.keys(map).filter(key => key !== `${center}:${center}`);
+    const numSpecialBiomes = Math.floor(specialBiomeKeys.length * 0.03); // 3% of the map
+    
+    for (let i = 0; i < numSpecialBiomes; i++) {
+        if (specialBiomeKeys.length === 0) break;
+        const randomIndex = Math.floor(Math.random() * specialBiomeKeys.length);
+        const randomKey = specialBiomeKeys.splice(randomIndex, 1)[0];
+        const specialType = specialBiomeTypes[Math.floor(Math.random() * specialBiomeTypes.length)];
+        
+        map[randomKey] = {
+            type: PlanetType.EmptySpace, // Special biomes are not colonizable planets
+            elevation: map[randomKey].elevation,
+            visualBiome: specialType,
+            elevationValue: map[randomKey].elevationValue,
+        };
     }
     
     // Layer resources and NPCs based on biome types
     const resources = [Resource.Ferrolyt, Resource.Luminis, Resource.Obskurit, Resource.Ätherharz];
     for (const key in map) {
         if (key === `${center}:${center}`) continue; // Skip home base
+        if (specialBiomeTypes.includes(map[key].visualBiome!)) continue; // Skip special biomes
 
         const random = Math.random(); // Use a simple random for sparse features
         const biome = map[key].visualBiome;
@@ -161,10 +198,10 @@ export const generateMapData = (size: number): MapData => {
         // 30% chance for a resource, with some biome affinity
         if (random < 0.3) {
             let resource: Resource | undefined;
-            if (biome === BiomeType.Mountains || biome === BiomeType.LavaFlows) resource = Resource.Ferrolyt;
-            else if (biome === BiomeType.CrystalSpires) resource = Resource.Luminis;
-            else if (biome === BiomeType.Wasteland) resource = Resource.Obskurit;
-            else if (biome === BiomeType.Forest || biome === BiomeType.FertilePlain) resource = Resource.Ätherharz;
+            if ([BiomeType.Mountains, BiomeType.LavaFlows, BiomeType.Wasteland, BiomeType.RedDesert].includes(biome!)) resource = Resource.Ferrolyt;
+            else if ([BiomeType.CrystalSpires, BiomeType.FrozenTundra, BiomeType.GlowingCaves].includes(biome!)) resource = Resource.Luminis;
+            else if ([BiomeType.ObsidianSpires, BiomeType.SaltFlats].includes(biome!)) resource = Resource.Obskurit;
+            else if ([BiomeType.Forest, BiomeType.FertilePlain, BiomeType.TropicalJungle, BiomeType.Swamp].includes(biome!)) resource = Resource.Ätherharz;
             
             if (!resource) resource = resources[Math.floor(random * resources.length)];
             
@@ -177,7 +214,7 @@ export const generateMapData = (size: number): MapData => {
         }
         
         // 10% chance for pirates in non-central areas
-        if (random > 0.9 && (biome === BiomeType.Wasteland || biome === BiomeType.Mountains)) {
+        if (random > 0.9 && (biome === BiomeType.Wasteland || biome === BiomeType.Mountains || biome === BiomeType.SaltFlats || biome === BiomeType.RedDesert)) {
             map[key].npc = {
                 type: 'pirate',
                 fleet: { [UnitType.SkimJaeger]: Math.floor(Math.random() * 10) + 5 },

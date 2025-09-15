@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal } from '../ui/Modal';
+import { Modal } from '../../Modal';
 import { CombatReport, UnitType, DefenseType, Resource } from '../../types';
 import { ALL_ITEM_DATA } from '../../constants/gameData';
 import { FerrolytIcon, LuminisIcon, ObskuritIcon } from '../../constants/icons';

@@ -12,7 +12,6 @@ Naht/Schnittstellen: keine Überstände über die Hexkante > 2%; Props halten 3%
 Build-Mask: pro Tile Binary Build Mask (Center 60–80% frei, Rand 20–40% belegt). Für KI: „open buildable center“ immer explizit nennen.
 `;
 
-// FIX: Aligned this record with the current BiomeType enum. Renamed obsolete keys (e.g., HighPlateau -> Mountains), removed keys that are no longer in the enum, and added placeholders for new enum members to satisfy the type definition.
 export const BIOME_PROMPT_SPECIFICATIONS: Record<BiomeType, string> = {
     [BiomeType.FertilePlain]: `
       Silhouette/Profil: Flache Oberseite; Höhenrauschen (Perlin) Amplitude 0.8% der Höhe; Baukern frei (Radius 0.55×).
@@ -25,6 +24,10 @@ export const BIOME_PROMPT_SPECIFICATIONS: Record<BiomeType, string> = {
       Prompt-Add-on: "flat grassy hex with blue-noise bushes and small stones, open center build mask ellipse 78x68%, fine hand-painted grass streaks, no emissive".
     `,
     [BiomeType.Forest]: ``,
+    [BiomeType.Swamp]: ``,
+    [BiomeType.RedDesert]: ``,
+    [BiomeType.TropicalJungle]: ``,
+    [BiomeType.FrozenTundra]: ``,
     [BiomeType.Mountains]: `
       Silhouette/Profil: Mesakörper, Randhöhe +0.12×; Top absolut plan (±0.2%).
       Fels-Schichtung: 3 Strata-Bänder: #5D6166 → #555A5E → #4B5156; Kantenbruch dunkler #3A3F44.
@@ -35,6 +38,7 @@ export const BIOME_PROMPT_SPECIFICATIONS: Record<BiomeType, string> = {
       Prompt-Add-on: "raised rock mesa with three visible strata bands, crisp beveled cliff edges, perfectly flat top building pad 62%, subtle dust overlay".
     `,
     [BiomeType.Wasteland]: ``,
+    [BiomeType.SaltFlats]: ``,
     [BiomeType.CrystalSpires]: ``,
     [BiomeType.LavaFlows]: `
       Silhouette/Profil: Basaltplatte; Fissuren 5–7 Linien von Mitte nach Rand, Breite 3–6 px.
@@ -43,8 +47,10 @@ export const BIOME_PROMPT_SPECIFICATIONS: Record<BiomeType, string> = {
       Build-Mask: 0.54–0.6 Kreis frei (je nach Fissurendichte).
       Prompt-Add-on: "basalt hex with glowing orange fissures (5–7), light ash film, safe flat center pad".
     `,
+    [BiomeType.ObsidianSpires]: ``,
+    [BiomeType.GlowingCaves]: ``,
     [BiomeType.PirateOutpost]: ``,
-    // Non-colonizable placeholders
+    // Non-colonizable
     [BiomeType.TimeRift]: `Geometrie: zackige Hauptrisslinie (Zig-Zag 5–7 Segmente), 10–14 Nebenrisse; Tiefe via parallax shading. Emissive: Kern #A46BFF, Rand #7DF0FF; Partikelstrom nach innen (20–30). Distortion-Hinweis: Boden-UV um Riss um 3–5% verschoben (Moiré andeuten). Prompt-Add-on: "jagged violet time tear with inward particle flow and subtle ground distortion".`,
     [BiomeType.BlackHole]: `Geometrie: zentraler Vortex (3 konzentrische Wirbelringe), Krümmung 6–9%; Event Horizon Rim #7DF0FF. Grav-Effekt: Bodenobjekte 4–6% zum Zentrum geneigt. Prompt-Add-on: "triple-ring black hole vortex with blue rim, slight inward bending of nearby props".`,
     [BiomeType.StormField]: `Geometrie: 3 Blitzmasten (Höhe 0.18×), Arcs #27D3E6 zwischen Spitzen; Schwebtrümmer 6–8 Steine. Prompt-Add-on: "stormy hex with three lightning rods, blue electric arcs linking tips, floating rock debris".`,

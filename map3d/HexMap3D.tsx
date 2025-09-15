@@ -3,7 +3,7 @@ import React, { useState, Suspense } from 'react';
 import * as THREE from 'three';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
-import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
+import { EffectComposer, Vignette } from '@react-three/postprocessing';
 import { HexContents } from './HexContents';
 import type { HexData } from './types';
 
@@ -59,12 +59,13 @@ export default function HexMap3D({ hexData, selectedCoords, homeBasePosition, on
 
     return (
         <Canvas dpr={[1, 1.5]} camera={{ position: [0, 20, 25], fov: 50, far: 400 }} shadows>
-            <fog attach="fog" args={['#0D1017', 50, 160]} />
-            <ambientLight intensity={0.2} />
-            <hemisphereLight intensity={0.3} groundColor="#0D1017" color="#ffffff" />
+            <fog attach="fog" args={['#0F1A24', 60, 200]} />
+            <ambientLight color="#0F1A24" intensity={1.0} />
+            <hemisphereLight intensity={0.5} groundColor="#333" color="#64748b" />
             <directionalLight
-                position={[20, 40, 10]}
+                position={[20, 50, 30]}
                 intensity={1.5}
+                color={"#FFFAF0"} 
                 castShadow
                 shadow-mapSize-width={2048}
                 shadow-mapSize-height={2048}
@@ -76,7 +77,7 @@ export default function HexMap3D({ hexData, selectedCoords, homeBasePosition, on
             />
             
             <Suspense fallback={null}>
-                <Environment preset="sunset" />
+                <Environment preset="dawn" />
                 <HexContents 
                     hexData={hexData} 
                     selectedCoords={selectedCoords} 
@@ -89,7 +90,6 @@ export default function HexMap3D({ hexData, selectedCoords, homeBasePosition, on
             <CameraAndControlsManager homeBasePosition={homeBasePosition} />
             
             <EffectComposer>
-                <Bloom luminanceThreshold={0.9} intensity={0.3} levels={9} mipmapBlur />
                 <Vignette eskil={false} offset={0.1} darkness={0.8} />
             </EffectComposer>
         </Canvas>

@@ -14,13 +14,18 @@ export interface MaterialInfo {
   metalness?: number;
   opacity?: number;
   transparent?: boolean;
-  // FIX: Added optional 'side' property to support double-sided materials.
   side?: number;
 }
 
 export interface GeometryInfo {
-  type: 'sphere' | 'box' | 'cylinder' | 'cone' | 'icosahedron' | 'ring' | 'plane';
+  type: 'sphere' | 'box' | 'cylinder' | 'cone' | 'icosahedron' | 'ring' | 'plane' | 'torus';
   args: number[]; // Arguments for the THREE.js geometry constructor
+}
+
+export interface AnimationInfo {
+  type: 'pulse' | 'float';
+  speed: number;
+  intensity: number;
 }
 
 export interface MeshInfo {
@@ -30,6 +35,7 @@ export interface MeshInfo {
   position: Vector3;
   scale: Vector3;
   rotation?: Vector3;
+  animation?: AnimationInfo;
 }
 
 export interface LightInfo {

@@ -2,9 +2,9 @@
 import React, { useMemo, useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import type { ThreeElements } from '@react-three/fiber';
+import { AsteroidGeometry } from './Asteroid';
 
 const asteroidMaterial = new THREE.MeshStandardMaterial({ color: '#57534e', roughness: 0.8, metalness: 0.2 });
-const asteroidGeo = new THREE.IcosahedronGeometry(1, 0);
 const ASTEROID_COUNT = 15;
 
 const mulberry32 = (a: number) => {
@@ -43,6 +43,6 @@ export function AsteroidFieldModel(props: ThreeElements['group']) {
     }, [rand]);
 
     return (
-        <instancedMesh ref={meshRef} args={[asteroidGeo, asteroidMaterial, ASTEROID_COUNT]} castShadow />
+        <instancedMesh ref={meshRef} args={[AsteroidGeometry, asteroidMaterial, ASTEROID_COUNT]} castShadow />
     );
 }

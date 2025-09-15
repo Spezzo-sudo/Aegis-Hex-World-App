@@ -1,5 +1,5 @@
 /// <reference types="@react-three/fiber" />
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import * as THREE from 'three';
 import { PlanetType } from '../types';
 import { HomeBaseModel } from './models/HomeBase';
@@ -8,10 +8,12 @@ import { axialToWorld, HEX_R } from './types';
 import { PlanetWithRingModel } from './models/PlanetWithRing';
 import { AsteroidFieldModel } from './models/AsteroidFieldModel';
 import { BarrenModel } from './models/BarrenModel';
-import type { HexModelDescription } from '../types/models';
+// FIX: Add MeshInfo to imports for explicit typing.
+import type { HexModelDescription, MeshInfo } from '../../types/models';
 import { ProceduralHexModel } from './ProceduralHexModel';
 import { PRE_GENERATED_HEX_MODELS } from '../constants/preGeneratedHexModels';
 import { BiomeType } from '../constants/biomeData';
+import { BlackHoleModel } from './models/BlackHole';
 
 // Coordinate system conversion
 const axial_to_oddq = (q: number, r: number) => {
@@ -20,28 +22,26 @@ const axial_to_oddq = (q: number, r: number) => {
     return { x, y };
 };
 
+// New Enhanced Base Model for fallbacks and fog
+const FogHexBaseModel: React.FC = () => {
+    const BASE_HEIGHT = 0.8;
+    const SOIL_3_HEIGHT = 0.4;
+    const SOIL_2_HEIGHT = 0.2;
+    const SOIL_1_HEIGHT = 0.2;
 
-// --- UNIFIED BASE MODEL ---
-// A thin hex tile with a border, for a flatter map design.
-const baseGeo = new THREE.CylinderGeometry(HEX_R, HEX_R, 0.2, 6);
-baseGeo.rotateY(Math.PI / 6);
-const baseMaterial = new THREE.MeshStandardMaterial({ color: '#334155', metalness: 0.2, roughness: 0.7 });
-const borderGeo = new THREE.EdgesGeometry(baseGeo);
-const borderMaterial = new THREE.LineBasicMaterial({ color: '#475569' });
+    // FIX: Add explicit MeshInfo type to prevent type inference issues.
+    const SOIL_3_MESH: MeshInfo = { id: 'diorama_soil_3', geometry: { type: 'cylinder', args: [1.2, 1.3, SOIL_3_HEIGHT, 6] }, material: { type: 'standard', color: '#111827', roughness: 0.9 }, position: [0, SOIL_3_HEIGHT/2, 0], scale: [1, 1, 1] };
+    const SOIL_2_MESH: MeshInfo = { id: 'diorama_soil_2', geometry: { type: 'cylinder', args: [1.1, 1.2, SOIL_2_HEIGHT, 6] }, material: { type: 'standard', color: '#1f2937', roughness: 0.9 }, position: [0, SOIL_3_HEIGHT + SOIL_2_HEIGHT/2, 0], scale: [1, 1, 1] };
+    const SOIL_1_MESH: MeshInfo = { id: 'diorama_soil_1', geometry: { type: 'cylinder', args: [1.0, 1.1, SOIL_1_HEIGHT, 6] }, material: { type: 'standard', color: '#374151', roughness: 0.9 }, position: [0, SOIL_3_HEIGHT + SOIL_2_HEIGHT + SOIL_1_HEIGHT/2, 0], scale: [1, 1, 1] };
+    const TOP_MESH: MeshInfo = { id: 'top', geometry: { type: 'cylinder', args: [1.0, 1.0, 0.05, 6] }, material: { type: 'standard', color: '#111827', roughness: 0.8 }, position: [0, BASE_HEIGHT, 0], scale: [1, 1, 1] };
 
-const HexBaseModel: React.FC = () => (
-    <group position-y={0.1}>
-        <mesh geometry={baseGeo} material={baseMaterial} receiveShadow />
-        <lineSegments geometry={borderGeo} material={borderMaterial} />
-    </group>
-);
+    const desc: HexModelDescription = { meshes: [SOIL_3_MESH, SOIL_2_MESH, SOIL_1_MESH, TOP_MESH] };
+    
+    return <ProceduralHexModel description={desc} />;
+};
 
-const FogHexModel: React.FC = () => (
-    <mesh position-y={0.1} receiveShadow>
-        <cylinderGeometry args={[HEX_R, HEX_R, 0.2, 6]} />
-        <meshStandardMaterial color="#0D1017" roughness={0.9} metalness={0.1} />
-    </mesh>
-);
+
+const FogHexModel: React.FC = () => <FogHexBaseModel />;
 
 const deepSpaceMaterial = new THREE.MeshStandardMaterial({ color: '#05080D', metalness: 0.3, roughness: 0.6, transparent: true, opacity: 0.5 });
 const emptyGeo = new THREE.CylinderGeometry(HEX_R, HEX_R, 0.1, 6);
@@ -60,6 +60,13 @@ const fallbackPlanetModels: Partial<Record<PlanetType, React.FC<any>>> = {
     [PlanetType.Barren]: BarrenModel,
 };
 
+const specialBiomeModels: Partial<Record<BiomeType, React.FC<any>>> = {
+    [BiomeType.BlackHole]: () => <BlackHoleModel scale={0.4} position-y={0.5} />,
+    [BiomeType.TimeRift]: () => <ProceduralHexModel description={PRE_GENERATED_HEX_MODELS[BiomeType.TimeRift][0]} />,
+    [BiomeType.StormField]: () => <ProceduralHexModel description={PRE_GENERATED_HEX_MODELS[BiomeType.StormField][0]} />,
+    [BiomeType.PrismField]: () => <ProceduralHexModel description={PRE_GENERATED_HEX_MODELS[BiomeType.PrismField][0]} />,
+}
+
 
 const FallbackPlanetContent: React.FC<{ hex: HexData }> = ({ hex }) => {
     const ModelComponent = fallbackPlanetModels[hex.planet.type];
@@ -67,7 +74,7 @@ const FallbackPlanetContent: React.FC<{ hex: HexData }> = ({ hex }) => {
 
     return (
         <>
-            {needsBase && <HexBaseModel />}
+            {needsBase && <ProceduralHexModel description={PRE_GENERATED_HEX_MODELS[BiomeType.Wasteland][0]} />}
             <group scale={2}>
                  {ModelComponent && <ModelComponent />}
             </group>
@@ -76,26 +83,27 @@ const FallbackPlanetContent: React.FC<{ hex: HexData }> = ({ hex }) => {
 };
 
 const ProceduralPlanetContent: React.FC<{ hex: HexData }> = ({ hex }) => {
-    const [modelDesc, setModelDesc] = React.useState<HexModelDescription | null>(null);
+    const [modelDesc, setModelDesc] = useState<HexModelDescription | null>(null);
 
     React.useEffect(() => {
         if (!hex.planet.visualBiome) return;
         
-        // Use the pre-generated model from the static data file.
-        // This completely avoids runtime API calls for map visuals.
         const biomeType = hex.planet.visualBiome as keyof typeof PRE_GENERATED_HEX_MODELS;
-        const modelData = PRE_GENERATED_HEX_MODELS[biomeType] || PRE_GENERATED_HEX_MODELS[BiomeType.FertilePlain]; // Fallback to a default
+        const modelVariants = PRE_GENERATED_HEX_MODELS[biomeType] || PRE_GENERATED_HEX_MODELS[BiomeType.FertilePlain];
+        
+        // Simple seeded random to pick a variant consistently
+        const variantIndex = Math.abs(Math.floor(hex.q * 31 + hex.r * 17)) % modelVariants.length;
+        const modelData = modelVariants[variantIndex];
         
         setModelDesc(modelData);
     }, [hex]);
 
     if (!modelDesc) {
-        return <HexBaseModel />; // Show base while loading description (should be instant)
+        return <FogHexBaseModel />; // Show base while loading description
     }
 
     return (
         <>
-            {/* The base model is now included within the procedural description for more control */}
             <ProceduralHexModel description={modelDesc} />
         </>
     );
@@ -111,7 +119,7 @@ const HexWrapper: React.FC<{
     isSelected: boolean;
     isHovered: boolean;
 }> = ({ children, hex, onHexClick, setHoveredHex, isSelected, isHovered }) => {
-    const p = axialToWorld(hex.q, hex.r, 0); // Flatten the map by ignoring elevationValue
+    const p = axialToWorld(hex.q, hex.r, hex.planet.elevationValue || 0);
     const position: [number, number, number] = [p.x, p.y, p.z];
 
     const randomRotationY = useMemo(() => {
@@ -181,12 +189,15 @@ export function HexContents({ hexData, selectedCoords, onHexClick, hoveredHex, s
                 const key = `${hex.q}-${hex.r}`;
                 const isSelected = selectedCoords?.q === hex.q && selectedCoords?.r === hex.r;
                 const isHovered = hoveredHex?.q === hex.q && hoveredHex?.r === hex.r;
+                const SpecialBiome = hex.planet.visualBiome ? specialBiomeModels[hex.planet.visualBiome] : null;
 
                 let ContentComponent;
                 if (!hex.discovered) {
                     ContentComponent = <FogHexModel />;
                 } else if (hex.isHome) {
                     ContentComponent = <HomeBaseModel scale={0.4} position-y={0} />;
+                } else if (SpecialBiome) {
+                    ContentComponent = <SpecialBiome />;
                 } else if (hex.planet.type === PlanetType.EmptySpace) {
                     ContentComponent = <EmptySpaceModel />;
                 } else if (hex.planet.visualBiome) {
